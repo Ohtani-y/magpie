@@ -1,168 +1,240 @@
-<!-- # 🐦 Magpie -->
+# 🧮 Magpie Reasoning - HLE数学対策特化版
 
 [![Magpie](figs/magpie_logo.png)](https://magpie-align.github.io/)
 
-[![arXiv](https://img.shields.io/badge/arXiv-paper-b31b1b.svg)](https://arxiv.org/abs/2406.08464) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![Data License](https://img.shields.io/badge/Data%20License-CC%20By%20NC%204.0-red.svg)](https://huggingface.co/Magpie-Align) [![Spaces](https://img.shields.io/badge/🤗-Open%20in%20Spaces-blue)](https://huggingface.co/spaces/davanstrien/magpie)
+[![arXiv](https://img.shields.io/badge/arXiv-paper-b31b1b.svg)](https://arxiv.org/abs/2406.08464) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![Data License](https://img.shields.io/badge/Data%20License-CC%20By%20NC%204.0-red.svg)](https://huggingface.co/Magpie-Align)
 
-This is the official repository for ICLR 2025 paper "[Alignment Data Synthesis from Scratch by Prompting Aligned LLMs with Nothing](https://arxiv.org/abs/2406.08464)". Magpie generates high-quality alignment data by prompting aligned LLMs with their pre-query templates. Unlike many existing synthetic data generation methods, Magpie doesn't rely on prompt engineering or seed questions for generating synthetic data. Instead, it uses the prompt template of an aligned LLM to generate both the user query and an LLM response.
+このリポジトリは、HLE（高等レベル試験）数学対策に特化したreasoning（推論）データセット生成システムです。DeepSeek R1モデルを使用して、高品質な数学推論データを生成します。
 
-- 🤗 [**Huggingface (Models and Datasets)**](https://huggingface.co/Magpie-Align)
-- 🧭 [**Dataset Navigation**](navigation.md)
-- 🕸️ [**Website**](https://magpie-align.github.io/)
-- 📄 [**Technical Report**](https://arxiv.org/abs/2406.08464)
-- 🤗 [**Magpie Demo**](https://huggingface.co/spaces/davanstrien/magpie) (Thanks a lot for the implementation from @davanstrien!)
-- 🐦 [**Chat with Magpie**](https://huggingface.co/spaces/flydust/Chat-with-Magpie)
+## 🎯 特徴
 
-## 🐦 News
-- [2025/01/22] Magpie paper is accepted by ICLR 2025! 
-- [2025/01/09] Magpie Reasoning V2 dataset is out! [250K]([https://huggiK](https://huggingface.co/collections/Magpie-Align/magpie-reasoning-datasets-67790a13b91035bc42693885)) from Llama, Skywork-o1 and QwQ! This time, we focus on CoT 🤯
-- [2025/01/01] Magpie Llama-3.3 dataset is out! [1M](https://huggingface.co/datasets/Magpie-Align/Magpie-Llama-3.3-Pro-1M-v0.1) from Llama-3.3-70B-Instruct! Happy New Year!
-- [2024/10/20] Magpie Qwen2.5 dataset is out! [1M](https://huggingface.co/datasets/Magpie-Align/Magpie-Qwen2.5-Pro-1M-v0.1) from Qwen2.5 72B!
-- [2024/09/17] Ship two new models with SOTA performance: 𝙼𝚊𝚐𝚙𝚒𝚎𝙻𝙼-𝙲𝚑𝚊𝚝 (4B & 8B)! See collection [here](https://huggingface.co/collections/Magpie-Align/magpielm-66e2221f31fa3bf05b10786a)!
-- [2024/08/19] Three preference optimization datasets, [Magpie-Air-DPO-100K-v0.1](https://huggingface.co/datasets/Magpie-Align/Magpie-Air-DPO-100K-v0.1), [Magpie-Pro-DPO-100K-v0.1](https://huggingface.co/datasets/Magpie-Align/Magpie-Pro-DPO-100K-v0.1), and [Magpie-Llama-3.1-Pro-DPO-100K-v0.1](https://huggingface.co/datasets/Magpie-Align/Magpie-Llama-3.1-Pro-DPO-100K-v0.1) are out! 
-- [2024/07/25] Magpie Llama-3.1 dataset is out! [1M](https://huggingface.co/datasets/Magpie-Align/Magpie-Llama-3.1-Pro-1M-v0.1) from Llama-3.1-70B-Instruct! More friendly license compared with Llama-3 😃!
-- [2024/07/21] Magpie Gemma2 dataset is out! [534K](https://huggingface.co/collections/Magpie-Align/magpie-gemma2-datasets-669da6aff21b09fdcecbd6ea) from Gemma-2-27b-it!
-- [2024/07/19] [Llama-3-8B-Magpie-Align-v0.3](https://huggingface.co/Magpie-Align/Llama-3-8B-Magpie-Align-v0.3) is out with enhanced Chinese question-answering ability, thanks to our new [Chinese instruction dataset](https://huggingface.co/datasets/Magpie-Align/Magpie-Qwen2-Pro-200K-Chinese)!
-- [2024/07/14] [Llama-3-8B-Magpie-Align-v0.2](https://huggingface.co/Magpie-Align/Llama-3-8B-Magpie-Align-v0.2) is out with enhanced reasoning ability, thanks to our new [reasoning booster dataset](https://huggingface.co/datasets/Magpie-Align/Magpie-Reasoning-150K)!
-- [2024/07/04] Magpie Qwen2 dataset is out! [1M](https://huggingface.co/datasets/Magpie-Align/Magpie-Qwen2-Pro-1M-v0.1) from Qwen2 72B and [3M](https://huggingface.co/datasets/Magpie-Align/Magpie-Qwen2-Air-3M-v0.1) from Qwen2 7B.
-- [2024/07/03] 🏆 Our open aligned model, [Llama-3-8B-Magpie-Align-v0.1](https://huggingface.co/Magpie-Align/Llama-3-8B-Magpie-Align-v0.1) is out! It is 🏆 the **best <30B Model** in [AI2 WildBench Leaderboard](https://huggingface.co/spaces/allenai/WildBench)! Even better than the official [Meta-Llama-3-8B-Instruct](https://huggingface.co/meta-llama/Meta-Llama-3-8B-Instruct) model!
-- [2024/06/24] Magpie Phi 3 dataset is out! [1M](https://huggingface.co/collections/Magpie-Align/magpie-phi3-667a7a45f1a406cd61685d64) from Phi 3 Medium.
-- [2024/06/12] Magpie Llama-3 dataset is out! [1M](https://huggingface.co/collections/Magpie-Align/magpie-pro-6666b0e713e5f5c09554876f) from Llama-3 70B and [3M](https://huggingface.co/collections/Magpie-Align/magpie-air-6666b11a32021655a27f86c0) from Llama-3 8B.
-- [2024/06/12] [Magpie technical report]((https://arxiv.org/abs/2406.08464)) is out! Let's make high-quality alignment data open for all!
+- **HLE数学対策特化**: 高等レベル試験に必要な数学問題に焦点
+- **DeepSeek R1統合**: 最新のDeepSeek R1モデルによる高品質推論
+- **英語データセット生成**: 英語LLMとの互換性を保持
+- **数学推論テンプレート**: 代数、微積分、幾何学等の専門テンプレート
+- **Chain-of-Thought対応**: 段階的思考プロセスを含む推論データ
 
-## Magpie Supports
+## 📚 SFTとAlignの違いについて
 
-Currently, Magpie has been tested on the **Llama-3**, **Qwen2**, **Phi 3** and **Gemma-2** series. Please [submit an issue](https://github.com/magpie-align/magpie/issues/new) for more model support.
+このシステムでは、2つの異なるタイプのデータセットを生成できます：
 
-|Model Family | Magpie | Magpie Scripts | Datasets | Size |
-|-------------|:------:|:-------|:-------|:-------|
-| [Llama 3.3](https://huggingface.co/collections/meta-llama/llama-33-67531d5c405ec5d08a852000)     | ✅ | [70B](scripts/magpie-llama3.3-70b.sh) | [70B](https://huggingface.co/datasets/Magpie-Align/Magpie-Llama-3.3-Pro-1M-v0.1) | 1M |
-| [Llama 3.1](https://huggingface.co/collections/meta-llama/llama-31-669fc079a0c406a149a5738f)     | ✅ * | [8B](scripts/magpie-llama3.1-8b.sh),[70B](scripts/magpie-llama3.1-70b.sh) | [70B](https://huggingface.co/collections/Magpie-Align/magpie-llama31-datasets-66a45ed727be07f53c8ff294),[405B(Argilla)](https://huggingface.co/datasets/argilla/magpie-ultra-v0.1) | 1M |
-| [Llama 3](https://huggingface.co/collections/meta-llama/meta-llama-3-66214712577ca38149ebb2b6)     | ✅ | [8B](scripts/magpie-llama3-8b.sh),[70B](scripts/magpie-llama3-70b.sh) | [8B](https://huggingface.co/collections/Magpie-Align/magpie-air-6666b11a32021655a27f86c0),[70B](https://huggingface.co/collections/Magpie-Align/magpie-pro-6666b0e713e5f5c09554876f) | 3M + 1M |
-| [Qwen2.5](https://huggingface.co/collections/Qwen/qwen25-66e81a666513e518adb90d9e)     | ✅ | [3B](scripts/magpie-qwen2.5-3b.sh),[7B](scripts/magpie-qwen2.5-7b.sh),[14B](scripts/magpie-qwen2.5-14b.sh),[32B](scripts/magpie-qwen2.5-32b.sh),[72B](scripts/magpie-qwen2.5-72b.sh) | [72B](https://huggingface.co/datasets/Magpie-Align/Magpie-Qwen2.5-Pro-1M-v0.1) | 1M | 
-| [Qwen2](https://huggingface.co/collections/Qwen/qwen2-6659360b33528ced941e557f)     | ✅ | [7B](scripts/magpie-qwen2-7b.sh),[72B](scripts/magpie-qwen2-72b.sh),[Math 7B](scripts/magpie-qwen2-math-7b.sh) | [7B](https://huggingface.co/datasets/Magpie-Align/Magpie-Qwen2-Air-3M-v0.1),[72B](https://huggingface.co/datasets/Magpie-Align/Magpie-Qwen2-Pro-1M-v0.1) | 3M + 1M |
-| [Phi 3](https://huggingface.co/collections/microsoft/phi-3-6626e15e9585a200d2d761e3)     | ✅ | [mini](scripts/magpie-phi3mini.sh),[small](scripts/magpie-phi3small.sh),[medium](scripts/magpie-phi3medium.sh) | [medium](https://huggingface.co/collections/Magpie-Align/magpie-phi3-667a7a45f1a406cd61685d64) | 1M |
-| [Gemma-2](https://huggingface.co/collections/google/gemma-2-release-667d6600fd5220e7b967f315)    | ✅ ** | [9B](magpie-gemma2-9b.sh),[27B](scripts/magpie-gemma2-27b.sh) | [27B](https://huggingface.co/collections/Magpie-Align/magpie-gemma2-datasets-669da6aff21b09fdcecbd6ea) | 534K |
-| [Gemma-1.1](https://huggingface.co/collections/google/gemma-release-65d5efbccdbb8c4202ec078b)    | ⭕️ | [7B](scripts/magpie-gemma7b.sh)
-| [Llama 2](https://huggingface.co/collections/meta-llama/llama-2-family-661da1f90a9d678b6f55773b)   | ⭕️ | [7B](scripts/magpie-llama2-7b.sh),[70B](scripts/magpie-llama2-70b.sh)
-| [Vicuna](https://lmsys.org/blog/2023-03-30-vicuna/)   | ⭕️ | [7B](scripts/magpie-vicuna-7b.sh)
-| [Mistral](https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.3)   | ⭕️ | [7B](scripts/magpie-mistral7b.sh)
-| [Yi](https://huggingface.co/collections/01-ai/yi-15-2024-05-663f3ecab5f815a3eaca7ca8)    | ⭕️ | [34B](scripts/magpie-yi34b.sh)
-| [DeepSeek Coder](https://huggingface.co/collections/deepseek-ai/deepseekcoder-v2-666bf4b274a5f556827ceeca) | ⭕️ | [Coder V2 Lite](https://github.com/magpie-align/magpie/blob/main/scripts/magpie-deepseek-coderv2-lite.sh)  
+### 🎓 SFT（Supervised Fine-Tuning）データ
+- **目的**: モデルに基本的な数学問題解決能力を教える
+- **構造**: 問題（instruction）と正解（response）のペア
+- **用途**: モデルの基礎的な数学推論能力を向上させる
+- **特徴**: 
+  - 1つの問題に対して1つの高品質な解答
+  - 正確性と完全性を重視
+  - 基本的なファインチューニングに使用
 
-- ✅: It works great! (**\*** Apply a logits processor to surpress markdown; **\*\*** Apply a [filter](exp/str_utils.py) before generating responses.)
-- ⭕️: It works! We can get something interesting, but we may need to design an additional logit processor and/or a filter.
-- ❌: Not work.
-- ❓: Untested.
+### 🎯 Align（嗜好データ）
+- **目的**: モデルの解答品質と人間の嗜好を一致させる
+- **構造**: 問題に対する複数の候補解答とその品質評価
+- **用途**: モデルの出力を人間の期待により近づける
+- **特徴**:
+  - 1つの問題に対して複数の候補解答を生成
+  - preferred（好ましい）とrejected（好ましくない）のペア
+  - 解答の品質差を学習させる
+  - DPO（Direct Preference Optimization）やRLHF（Reinforcement Learning from Human Feedback）に使用
 
-The navigation of all available Magpie datasets can be found [here](navigation.md).
+### 🔄 使い分けの指針
 
-We hope Magpie can contribute to the democratization of AI with enhanced transparency of model alignment processes!
+1. **SFTデータを先に使用**: まずモデルに基本的な数学解答能力を教える
+2. **Alignデータで調整**: その後、解答の品質と嗜好を調整する
+3. **反復的改善**: 必要に応じてSFTとAlignを交互に適用
 
-## Abstract
-<details><summary>Click Here</summary>
-High-quality instruction data is critical for aligning large language models (LLMs). Although some models, such as Llama-3-Instruct, have open weights, their alignment data remain private, which hinders the democratization of AI. High human labor costs and a limited, predefined scope for prompting prevent existing open-source data creation methods from scaling effectively, potentially limiting the diversity and quality of public alignment datasets. Is it possible to synthesize high-quality instruction data at scale by extracting it directly from an aligned LLM? We present a self-synthesis method for generating large-scale alignment data named Magpie. Our key observation is that aligned LLMs like Llama-3-Instruct can generate a user query when we input only the left-side templates up to the position reserved for user messages, thanks to their auto-regressive nature. We use this method to prompt Llama-3-Instruct and generate 4 million instructions along with their corresponding responses. We perform a comprehensive analysis of the extracted data and select 300K high-quality instances. To compare Magpie data with other public instruction datasets, we fine-tune Llama-3-8B-Base with each dataset and evaluate the performance of the fine-tuned models. Our results indicate that in some tasks, models fine-tuned with Magpie perform comparably to the official Llama-3-8B-Instruct, despite the latter being enhanced with 10 million data points through supervised fine-tuning (SFT) and subsequent feedback learning. We also show that using Magpie solely for SFT can surpass the performance of previous public datasets utilized for both SFT and preference optimization, such as direct preference optimization with UltraFeedback. This advantage is evident on alignment benchmarks such as AlpacaEval, ArenaHard, and WildBench.
-</details><be>
+### 📊 本番用ノートブックでの実装
 
-## Overview
+`demo_production.ipynb`では、以下の流れで両タイプのデータを生成できます：
 
-![Overview](figs/overview.png)
+1. **Step 1-2**: 基本的なSFTデータ生成（問題と解答）
+2. **Step 3**: データセット品質分析とフィルタリング
+3. **Step 4**: Alignデータ生成（複数候補と嗜好ペア）
+4. **Step 5**: 統合レポートと次のステップ
 
-## Installation
+この2段階アプローチにより、HLE数学対策に最適化された高品質なデータセットを効率的に生成できます。
 
-**Build environment**
-```
-git clone https://github.com/magpie-align/magpie.git
+## 🚀 対応モデル
+
+- **DeepSeek R1** (685B parameters, 37B activated) - 推奨
+- **Qwen2.5-Math** シリーズ
+- **Llama 3.x** シリーズ（数学テンプレート使用時）
+
+## 📰 更新情報
+- [2025/01/24] DeepSeek R1対応版リリース！HLE数学対策に特化したreasoning特化版
+- [2025/01/09] Magpie Reasoning V2データセット公開！[250K](https://huggingface.co/collections/Magpie-Align/magpie-reasoning-datasets-67790a13b91035bc42693885) CoT推論に焦点 🤯
+- [2024/07/14] 推論能力強化版リリース！[reasoning booster dataset](https://huggingface.co/datasets/Magpie-Align/Magpie-Reasoning-150K)による性能向上
+
+## 🤖 対応モデル
+
+HLE数学対策に特化したreasoning特化版では、数学推論に優れたモデルのみをサポートしています。
+
+|モデルファミリー | 対応状況 | スクリプト | 推奨用途 |
+|-------------|:------:|:-------|:-------|
+| [DeepSeek R1](https://huggingface.co/deepseek-ai/DeepSeek-R1) | ✅ 推奨 | [R1](scripts/magpie-deepseek-r1.sh) | HLE数学推論データ生成 |
+| [Qwen2.5-Math](https://huggingface.co/Qwen/Qwen2.5-Math-72B-Instruct) | ✅ | [Math 72B](scripts/magpie-qwen2.5-math-72b.sh) | 数学特化データセット |
+| [Qwen2-Math](https://huggingface.co/Qwen/Qwen2-Math-7B-Instruct) | ✅ | [Math 7B](scripts/magpie-qwen2-math-7b.sh) | 軽量数学データ生成 |
+| [Llama 3.x](https://huggingface.co/collections/meta-llama/llama-31-669fc079a0c406a149a5738f) | ✅ | [Math Template](scripts/magpie_math.sh) | 汎用数学推論 |
+
+- ✅: 完全対応・推奨
+- ⭕️: 基本対応
+- ❌: 非対応
+- ❓: 未テスト
+
+利用可能なreasoning特化データセットの詳細は[こちら](navigation.md)をご覧ください。
+
+## 📖 概要
+<details><summary>詳細を表示</summary>
+このHLE数学対策特化版は、高等レベル試験（HLE）に必要な数学推論能力を向上させるための高品質データセット生成に特化しています。DeepSeek R1の強力な推論能力を活用し、段階的思考プロセス（Chain-of-Thought）を含む数学問題とその解答を自動生成します。
+
+従来の汎用的なデータ生成手法とは異なり、本システムは：
+- **数学特化テンプレート**: 代数、微積分、幾何学、統計学等の専門分野に最適化
+- **HLE対策フォーカス**: 高等レベル試験で求められる思考プロセスを重視
+- **英語データセット**: 英語LLMとの互換性を保持しつつ高品質な推論データを生成
+- **DeepSeek R1統合**: 最新の推論特化モデルによる高度な数学問題生成
+
+生成されるデータセットは、数学的推論能力の向上、問題解決スキルの習得、HLE試験対策に最適化されています。
+</details>
+
+## 🏗️ インストール
+
+**環境構築**
+```bash
+git clone https://github.com/Ohtani-y/magpie.git
 cd magpie
-conda create -n magpie python=3.10 -y
-conda activate magpie
+conda create -n magpie-reasoning python=3.10 -y
+conda activate magpie-reasoning
 pip install -r requirements.txt
 ```
 
-**Get access to Llama-3 models from 🤗 Huggingface**
+**DeepSeek R1モデルへのアクセス設定**
 
-You can apply for Llama-3 model access [here](https://huggingface.co/meta-llama/Meta-Llama-3-8B-Instruct). To login in the terminal, enter:
-```
+DeepSeek R1モデルを使用するには、Hugging Faceにログインが必要です：
+```bash
 huggingface-cli login
 ```
-then enter your Huggingface private key beginning with "hf_".
+"hf_"で始まるHugging Face APIキーを入力してください。
 
-## Toy Example
+**GPU要件**
+- DeepSeek R1 (685B): 4×A100 80GB以上推奨
+- Qwen2.5-Math (72B): 2×A100 80GB以上
+- Qwen2-Math (7B): 1×RTX 4090 24GB以上
 
-**Play with Jupyter Notebook**
+## 🚀 クイックスタート
 
-The toy example can be found in [`demo.ipynb`](demo.ipynb). Have fun! 
+**DeepSeek R1による数学データ生成**
 
-<a target="_blank" href="https://colab.research.google.com/github/magpie-align/magpie/blob/main/demo.ipynb">
-  <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/>
-</a>
-
-## Batched SFT Data Generation
-We use Llama-3-8B-Instruct as an example to demonstrate the batched SFT data generation process. To run batched generation, you can simply run:
-```
+HLE数学対策データを生成するには：
+```bash
 cd scripts
-bash magpie.sh
+bash magpie-deepseek-r1.sh
 ```
-The script will generate both instructions and responses in the data folder. It has been tested on an RTX 4090 24G GPU. If you are using GPUs with less memory, consider implementing [quantization](https://docs.vllm.ai/en/latest/quantization/fp8.html).
 
-We also provide scripts for other models in the [`scripts`](scripts) folder. You can use [this](#magpie-supports) navigation to find specific Magpie scripts. Note that for model sizes greater than 8B, you may need 4*A100 GPUs to run the scripts.
+**数学特化テンプレートの使用**
 
-### Batched Multi-turn Data Generation \[Optional\]
-After generating instruction-response pairs, you can extend them to multi-turn conversations. To do so, simply run the following command:
+既存のLlamaモデルで数学特化データを生成：
+```bash
+cd scripts
+bash magpie_math.sh "meta-llama/Meta-Llama-3-70B-Instruct" 1000
 ```
-bash magpie-multi-turn.sh ***_ins_res.json
-```
-where `***_ins_res.json` is the single-turn instruction-response pairs generated in the previous step.
 
-## Dataset Filtering
-### 1. Tagging
-To tag the generated instruction-response pairs, you can run:
-```
+**生成パラメータの調整**
+
+- `total_prompts`: 生成する問題数（デフォルト: 1000）
+- `ins_temp`: 問題生成の創造性（デフォルト: 1.0）
+- `res_temp`: 解答生成の一貫性（デフォルト: 0.0）
+
+生成されたデータは`data/`フォルダに保存されます。RTX 4090 24GBでテスト済みです。メモリが不足する場合は[量子化](https://docs.vllm.ai/en/latest/quantization/fp8.html)の実装を検討してください。
+
+## 📊 データセット処理
+
+### 1. 品質タグ付け
+生成された数学問題にメタデータを付与：
+```bash
 cd scripts
 bash unitag.sh ***_ins_res.json all
 ```
-This script will automatically generate quality, difficulty, task category, safety, reward, and language for the generated dataset. You can also generate one tag at a time. For example, if you just want to generate the safety label using device 0, you can run:
-```
-cd scripts
-bash unitag.sh ***_ins_res.json safety 0
-```
-### 2. Data Concatenation and Converting
-You may generate datasets with different generation configurations. We provide a Jupyter notebook [here](data_sft/data_concatenation.ipynb) for concatenating all datasets and converting them to ShareGPT format, which is fully supported by [Axolotl](https://github.com/OpenAccess-AI-Collective/axolotl) for fine-tuning.
+このスクリプトは品質、難易度、問題カテゴリ、安全性、報酬、言語を自動生成します。
 
-### 3. Removing Repetition
-Once you have a full dataset converted to ShareGPT format, you can calculate the minimum neighbor distance of each instruction and remove repetitions. To do so, run:
-```
+### 2. データ重複除去
+ShareGPT形式に変換後、重複問題を除去：
+```bash
 cd exp
 python gen_dis.py --input_file ***_sharegpt.jsonl
 ```
-where `***_sharegpt.jsonl` is the dataset path obtained in the previous step. The Python script will take care of building the FAISS index and calculating the minimum distance. 
+FAISSインデックスを構築し、最小近傍距離を計算して重複を検出します。
 
-### 4. Design and Apply Your Filter
-We provide a Jupyter notebook [here](data_sft/data_filter.ipynb) for simple filtering. You can adjust the filtering parameters to design and apply your own filter based on your needs.
+### 3. HLE特化フィルタリング
+数学問題の難易度と品質に基づくフィルタリングが可能です。詳細は`data_sft/data_filter.ipynb`を参照してください。
 
-## Preference Data Generation
+### 4. 数学分野別分類
+生成されたデータセットは以下の分野に自動分類されます：
+- 代数学（Algebra）
+- 微積分学（Calculus）
+- 幾何学（Geometry）
+- 統計学（Statistics）
+- 数論（Number Theory）
 
-To generate preference data, first prepare filtered instructions following the steps outlined above. For the expected format, please refer to our example [here](data_po/example_instructions.jsonl).
+## 🎯 HLE対策特化機能
 
-Next, please use our provided scripts [here](scripts/magpie_example_po.sh) to generate multiple responses and compute their corresponding rewards. Finally, your can process the data and upload it to Huggingface using [this Jupyter notebook](data_po/process_po.ipynb).
+### 数学推論テンプレート
+HLE試験に特化した数学問題テンプレートを提供：
 
-## Fine-tuning
-Please take a look at the [recipes](recipes/) directory for instructions and our Magpie model recipes.
+```python
+# 代数問題テンプレート例
+"次の二次方程式を解き、解の過程を段階的に説明してください: ax² + bx + c = 0"
 
-## Citation
+# 微積分問題テンプレート例  
+"関数f(x)の極値を求め、グラフの概形を描くための手順を説明してください"
 
-If you find the model, data, or code useful, please cite our paper 🤩:
+# 幾何問題テンプレート例
+"三角形の面積を求める複数の方法を比較し、最適な手法を選択する理由を述べてください"
+```
+
+### Chain-of-Thought推論
+DeepSeek R1の強力な推論能力を活用し、段階的思考プロセスを含む解答を生成：
+
+1. **問題理解**: 与えられた条件の整理
+2. **解法選択**: 最適なアプローチの決定
+3. **計算実行**: 段階的な計算過程
+4. **結果検証**: 解の妥当性確認
+5. **一般化**: 類似問題への応用
+
+## 📚 使用例とベストプラクティス
+
+### HLE数学データセット生成の推奨設定
+
+```bash
+# 高品質な数学推論データ生成
+bash magpie-deepseek-r1.sh "deepseek-ai/DeepSeek-R1" 5000 1.0 1.2 1.0 0.1
+
+# パラメータ説明:
+# - モデル: DeepSeek R1 (推奨)
+# - 問題数: 5000問
+# - 問題生成温度: 1.0 (多様性)
+# - 問題生成top_p: 1.2 (創造性)
+# - 解答生成top_p: 1.0 (バランス)
+# - 解答生成温度: 0.1 (一貫性)
+```
+
+### データ品質向上のコツ
+
+1. **適切な温度設定**: 問題生成は高め（1.0-1.2）、解答生成は低め（0.0-0.2）
+2. **バッチサイズ調整**: GPU メモリに応じて最適化
+3. **フィルタリング**: 生成後の品質チェックを必ず実行
+4. **分野バランス**: 各数学分野が均等に含まれるよう調整
+
+## 🙏 謝辞
+
+本プロジェクトは元のMagpieプロジェクトをベースに、HLE数学対策に特化して開発されました。
+
+元論文の引用:
 ```
 @article{xu2024magpie,
   title={Magpie: Alignment Data Synthesis from Scratch by Prompting Aligned LLMs with Nothing},
   author={Zhangchen Xu and Fengqing Jiang and Luyao Niu and Yuntian Deng and Radha Poovendran and Yejin Choi and Bill Yuchen Lin},
   journal={ArXiv},
   year={2024},
-  volume={abs/2406.08464},
-  url={https://api.semanticscholar.org/CorpusID:270391432}
+  volume={abs/2406.08464}
 }
 ```
-
-## Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=magpie-align/magpie&type=Date)](https://star-history.com/#magpie-align/magpie&Date)
