@@ -321,9 +321,14 @@ else:
 
 同じ問題に対して複数の候補解答を生成し、preferred/rejectedペアを作成します。"""))
     
-    cells.append(nbf.v4.new_code_cell("""if GENERATE_ALIGN_DATA and os.path.exists(filtered_file):
+    cells.append(nbf.v4.new_code_cell("""# Alignデータ生成の前に変数を再定義（セル間の変数スコープ問題を回避）
+filtered_file = f"{OUTPUT_DIR}/{job_name}_ins_res_filtered.json"
+align_file = f"{OUTPUT_DIR}/{job_name}_align.json"
+
+if GENERATE_ALIGN_DATA and os.path.exists(filtered_file):
     print("🎯 Alignデータ生成を開始します...")
     print(f"🔢 候補解答数: {ALIGN_CANDIDATES}")
+    print(f"📁 フィルタ済みファイル: {filtered_file}")
     
     with open(filtered_file, 'r') as f:
         sft_data = json.load(f)
