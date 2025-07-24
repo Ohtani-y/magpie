@@ -54,9 +54,301 @@
 
 この2段階アプローチにより、HLE数学対策に最適化された高品質なデータセットを効率的に生成できます。
 
+## 🚀 Google Colab で始める
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Ohtani-y/magpie/blob/main/demo_colab.ipynb)
+
+Google Colabで簡単にHLE数学データ生成を体験できます：
+
+- **ワンクリック実行**: 上記のバッジをクリックしてColabで直接開始
+- **GPU環境**: A100 GPU推奨（無料版でも動作可能）
+- **完全ワークフロー**: 問題生成からAlign データまで一貫して実行
+- **ダウンロード機能**: 生成されたデータセットを直接ダウンロード
+
+### 📋 Colab実行要件
+
+- **GPU**: A100推奨（T4でも動作するが処理時間が長くなります）
+- **メモリ**: 高RAM設定推奨
+- **実行時間**: 小規模データセット（50問）で約15-30分
+
+## 📁 フォルダー構成と機能
+
+このリポジトリは、HLE数学対策に特化した効率的なデータ生成パイプラインを提供します。各ディレクトリの役割と主要ファイルについて説明します。
+
+### 🔧 configs/ - モデル設定とテンプレート定義
+
+```
+configs/
+└── model_configs.json    # モデル設定とプロンプトテンプレート
+```
+
+- **model_configs.json**: DeepSeek R1を含む各種モデルの設定ファイル
+  - `pre_query_template_math`: HLE数学特化のシステムプロンプト
+  - `stop_tokens`: 各モデルの停止トークン設定
+  - `stop_token_ids`: トークンID指定による停止制御
+
+### 🚀 scripts/ - データ生成スクリプト集
+
+```
+scripts/
+├── magpie-deepseek-r1.sh      # DeepSeek R1用HLE数学データ生成
+├── magpie_math.sh             # 汎用数学データ生成
+├── magpie-qwen2-math-7b.sh    # Qwen2 Math 7B用スクリプト
+└── magpie-qwen2.5-math-72b.sh # Qwen2.5 Math 72B用スクリプト
+```
+
+- **magpie-deepseek-r1.sh**: 推奨メインスクリプト
+  - HLE対策に最適化されたパラメータ設定
+  - 大型モデル対応のメモリ管理
+  - 日本語ログ出力による進捗確認
+  - バッチ処理による効率的な生成
+
+### ⚙️ exp/ - コア生成エンジン
+
+```
+exp/
+├── gen_ins.py           # 数学問題生成エンジン
+├── gen_res.py           # 解答生成エンジン
+├── gen_po_multi_res.py  # 複数候補解答生成
+├── gen_po_rewards.py    # 解答品質評価
+├── utils.py             # 共通ユーティリティ
+└── str_utils.py         # 文字列処理ユーティリティ
+```
+
+- **gen_ins.py**: 問題生成の中核
+  - `--control_tasks math`: 数学問題に特化
+  - DeepSeek R1のChain-of-Thought活用
+  - バッチ処理とチェックポイント機能
+
+- **gen_res.py**: 解答生成の中核
+  - 低温度設定による安定した解答生成
+  - 複数エンジン対応（vLLM, HuggingFace, API）
+  - 自動品質フィルタリング
+
+### 📊 data_sft/ - SFTデータ処理
+
+```
+data_sft/
+├── data_filter.ipynb        # データ品質フィルタリング
+└── data_concatenation.ipynb # 複数データセットの統合
+```
+
+- **data_filter.ipynb**: 生成データの品質管理
+  - 数学キーワード検出
+  - 解答長による自動フィルタリング
+  - 推論指標の分析
+
+### 🎯 data_po/ - 嗜好データ処理
+
+```
+data_po/
+├── process_po.ipynb                    # 嗜好データ処理パイプライン
+├── example_instructions.jsonl         # サンプル問題集
+├── example_instructions_5res.json     # 5候補解答サンプル
+└── example_instructions_5res_armorm.json # ArmorM評価付きサンプル
+```
+
+- **process_po.ipynb**: Alignデータ生成の中核
+  - Preferred/Rejected ペア作成
+  - 複数候補解答の品質評価
+  - DPO/RLHF用データ形式への変換
+
+### 📚 recipes/ - レシピ設定
+
+```
+recipes/
+├── Llama-3-8B-Magpie-Align-SFT-v0.1/   # Llama3 8B SFT設定
+├── Llama-3-8B-Magpie-Align-v0.1/       # Llama3 8B Align設定
+├── Llama-3.1-8B-Magpie-Align-v0.1/     # Llama3.1 8B設定
+└── README.md                            # レシピ使用方法
+```
+
+- 各レシピディレクトリには以下が含まれます：
+  - トレーニング設定ファイル
+  - データセット構成
+  - 評価メトリクス設定
+
+### 🖼️ figs/ - ドキュメント画像
+
+```
+figs/
+├── magpie_logo.png    # Magpieロゴ
+└── overview.png       # システム概要図
+```
+
+### 📓 ノートブック類
+
+```
+./
+├── demo.ipynb            # 基本デモノートブック
+├── demo_production.ipynb # 本番用統合ノートブック
+├── demo_colab.ipynb      # Google Colab対応版
+└── create_notebook.py    # ノートブック生成スクリプト
+```
+
+- **demo_production.ipynb**: 本番環境用の完全版
+  - ユーザー設定変数の一元管理
+  - SFTからAlignまでの完全ワークフロー
+  - 品質分析とレポート生成
+
+- **demo_colab.ipynb**: Google Colab特化版
+  - Colab環境での最適化
+  - ファイルダウンロード機能
+  - GPU設定の自動化
+
+## 🔄 データ生成ワークフロー
+
+### 1. 基本的な使用方法
+
+```bash
+# DeepSeek R1を使用したHLE数学データ生成
+cd scripts
+./magpie-deepseek-r1.sh deepseek-ai/DeepSeek-R1 1000 1.0 1.2 1.0 0.1
+```
+
+### 2. パラメータの説明
+
+- `model_path`: 使用するモデル（DeepSeek R1推奨）
+- `total_prompts`: 生成する問題数
+- `ins_topp`, `ins_temp`: 問題生成時のtop_pと温度
+- `res_topp`, `res_temp`: 解答生成時のtop_pと温度
+
+### 3. 出力ファイル
+
+生成されるファイルは `data/` ディレクトリに保存されます：
+
+- `*_ins.json`: 生成された数学問題
+- `*_res.json`: 対応する解答
+- `*_filtered.json`: 品質フィルタリング済みデータ
+- `*_align.json`: 嗜好データ（preferred/rejected ペア）
+
 ## 🚀 対応モデル
 
 - **DeepSeek R1** (685B parameters, 37B activated) - 推奨
+  - HLE数学問題に最適化されたChain-of-Thought推論
+  - 高品質な段階的解答生成
+  - 数学的厳密性と教育的価値の両立
+
+## 🛠️ インストール
+
+### ローカル環境
+
+```bash
+git clone https://github.com/Ohtani-y/magpie.git
+cd magpie
+pip install -r requirements.txt
+```
+
+### Google Colab
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Ohtani-y/magpie/blob/main/demo_colab.ipynb)
+
+Colabでは上記のリンクをクリックするだけで、環境構築から実行まで自動で行われます。
+
+## 🚀 クイックスタート
+
+### Google Colabで始める（推奨）
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Ohtani-y/magpie/blob/main/demo_colab.ipynb)
+
+1. 上記のバッジをクリック
+2. GPU設定をA100に変更（推奨）
+3. セルを順番に実行
+4. 生成されたデータセットをダウンロード
+
+### ローカル環境での基本的なデータ生成
+
+```bash
+cd scripts
+./magpie-deepseek-r1.sh deepseek-ai/DeepSeek-R1 1000
+```
+
+### 本番用ノートブック
+
+- **ローカル**: `demo_production.ipynb` 
+- **Google Colab**: `demo_colab.ipynb`
+
+どちらもステップバイステップでデータ生成を実行できます。
+
+## 📈 生成データの特徴
+
+- **高品質な数学推論**: Chain-of-Thought形式の詳細な解答
+- **HLE対策特化**: 高等レベル試験に必要な数学分野をカバー
+- **段階的思考プロセス**: 問題解決の各ステップを明確に記述
+- **教育的価値**: 学習者の理解を深める解説付き解答
+- **2種類のデータ形式**: SFT用とAlign用の両方に対応
+- **品質保証**: 自動フィルタリングによる高品質データの確保
+
+## 💡 使用例とベストプラクティス
+
+### 小規模テスト（推奨開始方法）
+
+```bash
+# 50問の小規模テスト
+./magpie-deepseek-r1.sh deepseek-ai/DeepSeek-R1 50 1.0 1.2 1.0 0.1
+```
+
+### 本格的なデータセット生成
+
+```bash
+# 1000問の本格的なデータセット
+./magpie-deepseek-r1.sh deepseek-ai/DeepSeek-R1 1000 1.0 1.2 1.0 0.1
+```
+
+### パラメータ調整のガイドライン
+
+- **問題生成温度**: 1.2（創造性と一貫性のバランス）
+- **解答生成温度**: 0.1（安定した高品質解答）
+- **バッチサイズ**: 50（メモリ効率と処理速度の最適化）
+
+## 🎯 GPU要件
+
+- **推奨**: NVIDIA A100 (80GB)
+- **最小**: NVIDIA V100 (32GB) または RTX 4090 (24GB)
+- **メモリ**: 最低16GB VRAM（DeepSeek R1の場合）
+- **Google Colab**: A100推奨（T4でも動作可能だが処理時間が長くなります）
+
+## 📊 生成例
+
+### 問題例
+```
+微積分学において、関数 f(x) = x³ - 3x² + 2x - 1 の極値を求め、
+その性質について詳しく説明してください。
+```
+
+### 解答例（Chain-of-Thought）
+```
+この問題を段階的に解決していきます。
+
+**ステップ1: 導関数の計算**
+f'(x) = 3x² - 6x + 2
+
+**ステップ2: 極値候補の特定**
+f'(x) = 0 となる点を求めます...
+[詳細な解答が続く]
+```
+
+## 🔗 関連リンク
+
+- **論文**: [Magpie: Alignment Data Synthesis from Scratch by Prompting Language Models with Nothing](https://arxiv.org/abs/2406.08464)
+- **DeepSeek R1**: [Hugging Face Model Page](https://huggingface.co/deepseek-ai/DeepSeek-R1)
+- **Google Colab デモ**: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Ohtani-y/magpie/blob/main/demo_colab.ipynb)
+
+## 🤝 貢献とサポート
+
+このプロジェクトへの貢献を歓迎します：
+
+1. **Issue報告**: バグや改善提案をGitHub Issuesで報告
+2. **プルリクエスト**: 新機能や修正のプルリクエストを送信
+3. **ドキュメント改善**: 使用方法やベストプラクティスの追加
+
+## 📄 ライセンス
+
+このプロジェクトはMITライセンスの下で公開されています。詳細は[LICENSE](LICENSE)ファイルをご覧ください。
+
+## 🙏 謝辞
+
+このプロジェクトは、元のMagpieプロジェクト（[Magpie-Align](https://magpie-align.github.io/)）をベースに、HLE数学対策に特化した改良を加えたものです。元の研究チームに深く感謝いたします。
 - **Qwen2.5-Math** シリーズ
 - **Llama 3.x** シリーズ（数学テンプレート使用時）
 
