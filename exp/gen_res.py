@@ -15,10 +15,9 @@ from transformers import AutoTokenizer, AutoModelForCausalLM
 # Configurations
 ################
 def get_args():
-    # Experiment Settings
-    parser = argparse.ArgumentParser(description="Response Generation Manager.")
-    parser.add_argument("--model_path", type=str, default="meta-llama/Meta-Llama-3-8B-Instruct",
-                        help="We will support more models in the future.")
+    parser = argparse.ArgumentParser(description="HLE数学推論解答生成マネージャー - DeepSeek R1対応版")
+    parser.add_argument("--model_path", type=str, default="deepseek-ai/DeepSeek-R1",
+                        help="HLE数学対策に使用するモデルパス（DeepSeek R1推奨）")
     parser.add_argument("--input_file", type=str, default=None, help="Input dataset file name")
     parser.add_argument("--batch_size", type=int, default=128, help="Number of samples per batch")
     parser.add_argument("--checkpoint_every", type=int, default=20, help="Save checkpoint every n batches")
