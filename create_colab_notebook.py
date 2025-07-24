@@ -62,17 +62,27 @@ print(f"📁 出力先: {OUTPUT_DIR}")"""))
 
 必要なパッケージをインストールし、環境を準備します。"""))
     
-    cells.append(nbf.v4.new_code_cell("""# GPU確認
+    cells.append(nbf.v4.new_code_cell("""# GPU確認とCUDA環境セットアップ
 !nvidia-smi
+
+!pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+!pip install transformers datasets accelerate
+!pip install vllm==0.6.5
+!pip install git+https://github.com/lm-sys/FastChat.git
+!pip install nbformat ipywidgets
+!pip install flash-attn --no-build-isolation
 
 !git clone https://github.com/Ohtani-y/magpie.git
 %cd magpie
 
 !pip install -r requirements.txt
 
-!pip install nbformat ipywidgets
-
-print("✅ 環境セットアップが完了しました")"""))
+print("✅ 環境セットアップが完了しました")
+print("📦 インストール済みパッケージ:")
+print("  - vllm (LLM推論エンジン)")
+print("  - fastchat (会話テンプレート)")
+print("  - torch (PyTorch)")
+print("  - transformers (Hugging Face)")"""))
     
     cells.append(nbf.v4.new_code_cell("""import os
 import json
@@ -85,9 +95,19 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 timestamp = int(datetime.now().timestamp())
 job_name = f"{DATASET_NAME}_{TOTAL_PROBLEMS}_{timestamp}"
 
+instruction_file = f"{OUTPUT_DIR}/{job_name}_ins.json"
+response_file = f"{OUTPUT_DIR}/{job_name}_ins_res.json"
+filtered_file = f"{OUTPUT_DIR}/{job_name}_ins_res_filtered.json"
+align_file = f"{OUTPUT_DIR}/{job_name}_align.json"
+
 print(f"📁 出力ディレクトリ: {OUTPUT_DIR}")
 print(f"🏷️ ジョブ名: {job_name}")
 print(f"⏰ タイムスタンプ: {timestamp}")
+print(f"📄 予定ファイル:")
+print(f"  - 問題: {os.path.basename(instruction_file)}")
+print(f"  - 解答: {os.path.basename(response_file)}")
+print(f"  - フィルタ済み: {os.path.basename(filtered_file)}")
+print(f"  - Align: {os.path.basename(align_file)}")
 
 config = {
     "dataset_name": DATASET_NAME,
@@ -98,7 +118,13 @@ config = {
     "instruction_temperature": INSTRUCTION_TEMPERATURE,
     "instruction_top_p": INSTRUCTION_TOP_P,
     "response_temperature": RESPONSE_TEMPERATURE,
-    "response_top_p": RESPONSE_TOP_P
+    "response_top_p": RESPONSE_TOP_P,
+    "files": {
+        "instruction_file": instruction_file,
+        "response_file": response_file,
+        "filtered_file": filtered_file,
+        "align_file": align_file
+    }
 }
 
 with open(f"{OUTPUT_DIR}/config.json", "w") as f:
@@ -277,7 +303,7 @@ if os.path.exists(response_file):
     print(f"✅ フィルタリング完了: {len(dataset)} → {len(filtered_dataset)} サンプル")
     print(f"📊 保持率: {len(filtered_dataset)/len(dataset)*100:.1f}%")
     
-    filtered_file = response_file.replace('.json', '_filtered.json')
+    # filtered_fileは既にグローバルスコープで定義済み
     with open(filtered_file, 'w') as f:
         json.dump(filtered_dataset, f, indent=2, ensure_ascii=False)
     
