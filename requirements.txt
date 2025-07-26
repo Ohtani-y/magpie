@@ -1,0 +1,35 @@
+--extra-index-url https://flashinfer.ai/whl/cu124/torch2.4/
+# LLM
+# flash-attn[--no-build-isolation]
+vllm==0.6.5
+transformers
+sentence-transformers
+sentencepiece
+trl
+peft
+datasets
+accelerate
+bitsandbytes
+autoawq
+ray
+flashinfer
+
+# Cloud API & Chat
+git+https://github.com/lm-sys/FastChat.git
+tenacity
+boto3
+openai
+google-generativeai
+anthropic
+together
+
+# Widgets & Visualization
+matplotlib
+wandb
+ipywidgets
+ipykernel
+
+# Utils
+lingua-language-detector
+faiss-gpu
+ml_collections
