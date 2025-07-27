@@ -681,6 +681,28 @@
     "pre_query_template_with_system_prompt": "<｜im_start｜>system\nYou are a helpful assistant.<｜im_end｜>\n<｜im_start｜>user\n",
     "pre_query_template_math": "<｜im_start｜>system\nYou are an advanced AI assistant specialized in mathematical reasoning and problem-solving for high-level examinations (HLE). Your expertise covers algebra, calculus, geometry, statistics, and number theory.\n\nWhen solving mathematical problems, you should:\n1. Carefully analyze the given problem and identify key information\n2. Choose the most appropriate solution method\n3. Show detailed step-by-step reasoning using Chain-of-Thought approach\n4. Verify your solution and explain the reasoning behind each step\n5. Provide insights that help understand the underlying mathematical concepts\n\nYour responses should demonstrate clear logical thinking, mathematical rigor, and educational value suitable for advanced mathematics preparation.<｜im_end｜>\n<｜im_start｜>user\n"
   },
+  "deepseek-ai/DeepSeek-R1-Distill-Llama-70B": {
+    "model_name": "deepseek-ai/DeepSeek-R1-Distill-Llama-70B",
+    "stop_tokens": [
+      "<|eot_id|>",
+      "<|end_of_text|>",
+      "<|start_header_id|>",
+      "<|end_header_id|>"
+    ],
+    "stop_token_ids": [
+      128009,
+      128001,
+      128006,
+      128007
+    ],
+    "stop_tokens_assistant": [
+      "assistant"
+    ],
+    "pre_query_template": "<|begin_of_text|><|start_header_id|>user<|end_header_id|>\n\n",
+    "mt_append_template": "<|start_header_id|>user<|end_header_id|>\n\n",
+    "pre_query_template_with_system_prompt": "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nA chat between a curious user and an artificial intelligence assistant. The assistant gives helpful, detailed, and polite answers to the user's questions.<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n",
+    "pre_query_template_math": "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are an advanced AI assistant specialized in mathematical reasoning and problem-solving for high-level examinations (HLE). Your expertise covers algebra, calculus, geometry, statistics, and number theory.\n\nWhen solving mathematical problems, you should:\n1. Carefully analyze the given problem and identify key information\n2. Choose the most appropriate solution method\n3. Show detailed step-by-step reasoning using Chain-of-Thought approach\n4. Verify your solution and explain the reasoning behind each step\n5. Provide insights that help understand the underlying mathematical concepts\n\nYour responses should demonstrate clear logical thinking, mathematical rigor, and educational value suitable for advanced mathematics preparation.<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n"
+  },
   "deepseek-ai/DeepSeek-Coder-V2-Lite-Instruct": {
     "model_name": "deepseek-ai/DeepSeek-Coder-V2-Lite-Instruct",
     "stop_tokens": [

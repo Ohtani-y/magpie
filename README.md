@@ -25,9 +25,12 @@ git clone https://github.com/Ohtani-y/magpie.git
 cd magpie
 pip install -r requirements.txt
 
-# DeepSeek R1でデータ生成
+# DeepSeek R1でデータ生成（単一実行）
 cd scripts
 ./magpie-deepseek-r1.sh deepseek-ai/DeepSeek-R1 1000
+
+# 6ドメイン数学データセット一括生成（推奨）
+./generate_all_domains.sh
 ```
 
 ## 🎯 特徴

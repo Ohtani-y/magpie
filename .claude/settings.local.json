@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(git push:*)",
-      "Bash(chmod:*)"
+      "Bash(chmod:*)",
+      "Bash(python:*)",
+      "Bash(git add:*)"
     ],
     "deny": []
   }
