@@ -526,6 +526,66 @@ model_selector = widgets.Dropdown(
 - **データ保存**: 定期的にGoogle Driveに保存
 - **エラー対処**: ランタイム再起動で多くの問題が解決
 
+## 📋 オリジナルとの実装比較
+
+### `run_math_generation.sh`で呼び出されるコード分析
+
+`magpie-y/scripts/`の`run_math_generation.sh`スクリプトは、数学データセット生成のためのインタラクティブメニューを提供し、以下のスクリプトを呼び出します：
+
+1. **`generate_domain_dataset.sh`** - ドメイン固有の数学データセット生成
+2. **`generate_all_math_domains.sh`** - 全ドメイン44K問題データセット生成
+
+これらは最終的に以下のPythonモジュールを実行：
+- `../exp/gen_ins.py` - 問題生成
+- `../exp/gen_res.py` - 解答生成
+- `../exp/gen_po_multi_res.py` - 複数解答生成
+- `../exp/gen_po_rewards.py` - 解答品質評価
+
+### オリジナル(magpie)との主要な違い
+
+| コンポーネント | オリジナル | HLE数学版 (magpie-y) |
+|-----------|-----------|---------------------|
+| **目的** | 汎用アライメントデータ合成 | HLE数学特化 |
+| **デフォルトモデル** | `meta-llama/Meta-Llama-3-8B-Instruct` | `deepseek-ai/DeepSeek-R1` |
+| **サポートタスク** | `translation`, `code`, `math` | `math`, `probability`のみ |
+| **ドメインサポート** | 汎用目的 | 6つの数学専門ドメイン |
+| **ドキュメント** | 英語 | 日本語（HLE試験対応） |
+
+### HLE版での主要なコード変更
+
+#### 1. `exp/gen_ins.py`の変更
+```python
+# オリジナル
+parser.add_argument("--control_tasks", type=str, default=None, 
+                   choices=[None, "translation", "code", "math"])
+
+# HLE版
+parser.add_argument("--control_tasks", type=str, default="math", 
+                   choices=[None, "math", "probability"])
+parser.add_argument("--domain", type=str, default=None, 
+                   help="数学ドメイン指定 (algebra, calculus, geometry, etc.)")
+```
+
+#### 2. 数学ドメイン特化機能
+- `configs/model_configs.json`でのドメイン固有プロンプトテンプレート
+- 数学推論用に最適化されたパラメータ
+- 複雑な証明用の拡張トークン制限（4096トークン）
+- 数学問題に最適化された温度設定
+
+### requirements.txt比較
+
+**重要**: 両バージョンの`requirements.txt`は**完全に同一**です。同じ技術基盤を使用していますが、実装と特化において大きく異なります。
+
+### 結論
+
+**magpie-y版はオリジナルとは異なる特化フォーク**です：
+
+1. **特化した目的**: 汎用アライメント → HLE数学教育特化
+2. **モデル最適化**: DeepSeek R1と数学推論用にチューニング
+3. **ドメインアーキテクチャ**: 6つの数学専門ドメインを追加
+4. **パラメータチューニング**: 数学問題用に最適化
+5. **日本語ローカライゼーション**: 全インターフェースが日本語
+
 ## 📖 詳細ドキュメント
 
 - **論文**: [Magpie: Alignment Data Synthesis from Scratch](https://arxiv.org/abs/2406.08464)
@@ -539,3 +599,6 @@ model_selector = widgets.Dropdown(
 ## 🙏 謝辞
 
 このプロジェクトは、元のMagpieプロジェクトをベースに、HLE数学対策に特化した改良を加えたものです。元の研究チームに深く感謝いたします。
+
+**オリジナル論文**: "[Alignment Data Synthesis from Scratch by Prompting Aligned LLMs with Nothing](https://arxiv.org/abs/2406.08464)"  
+**オリジナルプロジェクト**: [magpie-align/magpie](https://github.com/magpie-align/magpie.git)
