@@ -21,6 +21,8 @@ def get_args():
     parser.add_argument("--model_path", type=str, default="meta-llama/Meta-Llama-3-8B-Instruct",
                         help="We will support more models in the future.")
     parser.add_argument("--input_file", type=str, default=None, help="Input dataset file name")
+    parser.add_argument("--ins_data_path", type=str, default=None, help="Input instruction dataset file path")
+    parser.add_argument("--save_path", type=str, default=None, help="Output file path")
     parser.add_argument("--batch_size", type=int, default=128, help="Number of samples per batch")
     parser.add_argument("--checkpoint_every", type=int, default=20, help="Save checkpoint every n batches")
     parser.add_argument("--api_url", type=str, default="https://api.together.xyz/v1/chat/completions", help="API URL")
@@ -39,6 +41,7 @@ def get_args():
     parser.add_argument("--top_p", type=float, default=1.0)
     parser.add_argument("--repetition_penalty", type=float, default=1.0)
     parser.add_argument("--num_samples", type=int, default=5)
+    parser.add_argument("--num_responses", type=int, default=5, help="Number of responses to generate per instruction")
     parser.add_argument("--tokenizer_template", type=bool, default=False, help="Use tokenizer template for generating the response.")
     parser.add_argument("--use_tokenizer_template", action="store_true", dest="tokenizer_template")
 
@@ -47,16 +50,28 @@ def get_args():
 args = get_args()
 print(f"Response Generation Manager. Arguments: {args}") # For logging
 
-if args.input_file is None:
-    raise ValueError("Please specify the input file path.")
+# Handle input file argument - prioritize ins_data_path, fall back to input_file
+if args.ins_data_path:
+    INPUT_FILE_NAME = args.ins_data_path
+elif args.input_file:
+    INPUT_FILE_NAME = args.input_file
+else:
+    raise ValueError("Please specify the input file path using --ins_data_path or --input_file.")
+
+# Use num_responses if provided, otherwise fall back to num_samples
+NUM_RESPONSES = args.num_responses if args.num_responses else args.num_samples
 
 # Constants for the local vllm engine
 MODEL_NAME = args.model_path
-INPUT_FILE_NAME = args.input_file 
 BATCH_SIZE = args.batch_size
-CHECKPOINT_FILE = f"{INPUT_FILE_NAME[:INPUT_FILE_NAME.rfind('.')]}_{args.num_samples}res_checkpoint.json"
+CHECKPOINT_FILE = f"{INPUT_FILE_NAME[:INPUT_FILE_NAME.rfind('.')]}_{NUM_RESPONSES}res_checkpoint.json"
 CHECKPOINT_EVERY = args.checkpoint_every
-SAVED_FILE = f"{INPUT_FILE_NAME[:INPUT_FILE_NAME.rfind('.')]}_{args.num_samples}res.json"
+
+# Handle output file - use save_path if provided, otherwise default naming
+if args.save_path:
+    SAVED_FILE = args.save_path
+else:
+    SAVED_FILE = f"{INPUT_FILE_NAME[:INPUT_FILE_NAME.rfind('.')]}_{NUM_RESPONSES}res.json"
 
 # Obtain config from configs/model_configs.json
 with open("../configs/model_configs.json", "r") as f:
@@ -108,7 +123,7 @@ def process_batch_with_api(batch):
             item = future_to_item[future]
             try:
                 api_responses = []
-                for _ in range(args.num_samples):  # Generate multiple samples
+                for _ in range(NUM_RESPONSES):  # Generate multiple samples
                     api_response = future.result()
                     api_responses.append(api_response.strip())
                 item['responses'] = api_responses
@@ -144,11 +159,11 @@ def process_batch(batch, llm, params, tokenizer=None):
 
     all_outputs = []
     if args.engine == "vllm":
-        for _ in range(args.num_samples):  # Generate multiple samples
+        for _ in range(NUM_RESPONSES):  # Generate multiple samples
             outputs = llm.generate(prompts, params)
             all_outputs.append(outputs)
     elif args.engine == "hf":
-        for _ in range(args.num_samples):  # Generate multiple samples
+        for _ in range(NUM_RESPONSES):  # Generate multiple samples
             inputs = tokenizer(prompts, return_tensors="pt", padding=True, truncation=True).to(torch.cuda.current_device())
             gen_do_sample = False if args.temperature == 0 else True
             outputs = llm.generate(**inputs,

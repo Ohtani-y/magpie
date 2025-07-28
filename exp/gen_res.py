@@ -19,6 +19,8 @@ def get_args():
     parser.add_argument("--model_path", type=str, default="deepseek-ai/DeepSeek-R1",
                         help="HLE数学対策に使用するモデルパス（DeepSeek R1推奨）")
     parser.add_argument("--input_file", type=str, default=None, help="Input dataset file name")
+    parser.add_argument("--ins_data_path", type=str, default=None, help="Input instruction dataset file path")
+    parser.add_argument("--save_path", type=str, default=None, help="Output file path")
     parser.add_argument("--batch_size", type=int, default=128, help="Number of samples per batch")
     parser.add_argument("--checkpoint_every", type=int, default=20, help="Save checkpoint every n batches")
     parser.add_argument("--api_url", type=str, default="https://api.together.xyz/v1/chat/completions", help="API URL")
@@ -44,16 +46,25 @@ def get_args():
 args = get_args()
 print(f"Response Generation Manager. Arguments: {args}") # For logging
 
-if args.input_file is None:
-    raise ValueError("Please specify the input file path.")
+# Handle input file argument - prioritize ins_data_path, fall back to input_file
+if args.ins_data_path:
+    INPUT_FILE_NAME = args.ins_data_path
+elif args.input_file:
+    INPUT_FILE_NAME = args.input_file
+else:
+    raise ValueError("Please specify the input file path using --ins_data_path or --input_file.")
 
 # Constants for the local vllm engine
 MODEL_NAME = args.model_path
-INPUT_FILE_NAME = args.input_file 
 BATCH_SIZE = args.batch_size
 CHECKPOINT_FILE = f"{INPUT_FILE_NAME[:INPUT_FILE_NAME.rfind('.')]}_res_checkpoint.json"
 CHECKPOINT_EVERY = args.checkpoint_every
-SAVED_FILE = f"{INPUT_FILE_NAME[:INPUT_FILE_NAME.rfind('.')]}_res.json"
+
+# Handle output file - use save_path if provided, otherwise default naming
+if args.save_path:
+    SAVED_FILE = args.save_path
+else:
+    SAVED_FILE = f"{INPUT_FILE_NAME[:INPUT_FILE_NAME.rfind('.')]}_res.json"
 
 # Obtain config from configs/model_configs.json
 with open("../configs/model_configs.json", "r") as f:

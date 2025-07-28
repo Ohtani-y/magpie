@@ -51,6 +51,7 @@ def get_args():
     parser.add_argument("--swap_space", type=float, default=2.0)
     parser.add_argument("--checkpoint_every", type=int, default=100, help="Save checkpoint every n repeats.")
     parser.add_argument("--output_folder", type=str, default="../data")
+    parser.add_argument("--save_path", type=str, default=None, help="Full path for output file. If specified, overrides default naming.")
     parser.add_argument("--job_name", type=str, default=None, help="Job Name. Get from the script.")
     parser.add_argument("--timestamp", type=int, default=int(time.time()), help="Timestamp for the job. Also used as the random seed.")
     parser.add_argument("--seed", type=int, default=None, help="Random seed.")
@@ -84,13 +85,18 @@ def main():
         torch.cuda.manual_seed_all(args.seed)
     
     # Create output file / folder
-    output_filename = f"Magpie_{args.model_path.split('/')[-1]}_{args.total_prompts}_{args.timestamp}_ins.json"
-    if not args.job_name:
-        if not os.path.exists(args.output_folder):
-            os.makedirs(args.output_folder)
-        output_dir = f"{args.output_folder}/{output_filename}"
+    if args.save_path:
+        output_dir = args.save_path
+        # Ensure directory exists
+        os.makedirs(os.path.dirname(output_dir), exist_ok=True)
     else:
-        output_dir = f"{args.output_folder}/{args.job_name}/{output_filename}"
+        output_filename = f"Magpie_{args.model_path.split('/')[-1]}_{args.total_prompts}_{args.timestamp}_ins.json"
+        if not args.job_name:
+            if not os.path.exists(args.output_folder):
+                os.makedirs(args.output_folder)
+            output_dir = f"{args.output_folder}/{output_filename}"
+        else:
+            output_dir = f"{args.output_folder}/{args.job_name}/{output_filename}"
     
     # Set the device
     os.environ["CUDA_VISIBLE_DEVICES"] = args.device

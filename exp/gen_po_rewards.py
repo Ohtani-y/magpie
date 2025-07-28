@@ -53,6 +53,10 @@ def get_args():
     parser = argparse.ArgumentParser(description="Tagging Manager.")
     parser.add_argument("--input_file", type=str, default=None,
                         help="Input dataset file name")
+    parser.add_argument("--ins_data_path", type=str, default=None, help="Input instruction dataset file path")
+    parser.add_argument("--save_path", type=str, default=None, help="Output file path")
+    parser.add_argument("--model_name_or_path", type=str, default="RLHFlow/ArmoRM-Llama3-8B-v0.1", help="Reward model path")
+    parser.add_argument("--gpu_memory_utilization", type=float, default=0.9, help="GPU memory utilization")
     parser.add_argument("--batch_size", type=int, default=1, help="Number of samples per batch.")
     parser.add_argument("--checkpoint_every", type=int, default=5000, help="Save checkpoint every n batches")
 
@@ -107,12 +111,24 @@ def generate_and_update(dataset, model, checkpoint_file, checkpoint_every = 20):
     return dataset
 
 # main
-input_file = args.input_file
-output_file = f"{input_file[:input_file.rfind('.')]}_armorm.json"
+# Handle input file argument - prioritize ins_data_path, fall back to input_file
+if args.ins_data_path:
+    input_file = args.ins_data_path
+elif args.input_file:
+    input_file = args.input_file
+else:
+    raise ValueError("Please specify the input file path using --ins_data_path or --input_file.")
+
+# Handle output file - use save_path if provided, otherwise default naming
+if args.save_path:
+    output_file = args.save_path
+else:
+    output_file = f"{input_file[:input_file.rfind('.')]}_armorm.json"
+
 checkpoint_file = f"{input_file[:input_file.rfind('.')]}_armorm_checkpoint.json"
 dataset = load_dataset_from_file(input_file)
 
-model = ArmoRMPipeline("RLHFlow/ArmoRM-Llama3-8B-v0.1", trust_remote_code=True, device_map=f"cuda:{args.device}")
+model = ArmoRMPipeline(args.model_name_or_path, trust_remote_code=True, device_map=f"cuda:{args.device}")
 
 updated_dataset = generate_and_update(dataset, model, checkpoint_file, checkpoint_every)
 
