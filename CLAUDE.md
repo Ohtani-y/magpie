@@ -196,3 +196,7 @@ The system generates problems across 5 specialized domains:
 - Output files follow pattern: `Magpie_{model}_{count}_{timestamp}_{type}.json`
 - Japanese logging enabled in DeepSeek R1 scripts for progress tracking
 - Temperature settings: Higher for problem generation (1.0-1.2), lower for answers (0.0-0.2)
+
+## Development Memories
+
+- 対話式メニューで簡単生成（推奨）: Update `cd scripts/run_math_generation.sh` to support specifying menu choices via arguments
