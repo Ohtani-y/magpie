@@ -1,11 +1,11 @@
 {
   "permissions": {
     "allow": [
-      "Bash(git push:*)",
-      "Bash(chmod:*)",
-      "Bash(python:*)",
-      "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "git",
+      "ssh",
+      "Bash(mv:*)",
+      "Bash(rm:*)",
+      "Bash(git add:*)"
     ],
     "deny": []
   }

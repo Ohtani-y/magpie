@@ -6,12 +6,12 @@
 # language models. It supports both interactive and non-interactive modes.
 #
 # QUICK USAGE (数値で指定):
-#   ./run_math_generation.sh 1 1 1        # DeepSeek-Qwen-32Bで代数10K問題
-#   ./run_math_generation.sh 5 2          # Qwen-Math-72Bで全ドメイン44K問題
-#   ./run_math_generation.sh 2 1 2 5000   # DeepSeek-Llama-70Bで微積分5000問題
+#   ./run_math_generation.sh 1 L 1      # DeepSeek-Qwen-32Bで全ドメイン標準サイズ(44K問題)
+#   ./run_math_generation.sh 5 M 1      # Qwen-Math-72Bで全ドメイン中サイズ(22K問題)
+#   ./run_math_generation.sh 2 M 2 2    # DeepSeek-Llama-70Bで微積分中サイズ(5K問題)
 #
 # USAGE:
-#   ./run_math_generation.sh [OPTIONS] [model] [mode] [domain] [count]
+#   ./run_math_generation.sh [OPTIONS] [model] [scale] [mode] [domain]
 #
 # OPTIONS:
 #   -h, --help     Show this help message and exit
@@ -25,34 +25,37 @@
 #           5 = Qwen2.5-Math-72B-Instruct (Mathematics specialist)
 #           6 = Qwen2.5-Coder-32B-Instruct (Computational mathematics focus)
 #
+#   scale   Generation scale (S/M/L/XL)
+#           S  = Small (10% - テスト用)
+#           M  = Medium (50% - 開発用)
+#           L  = Large (100% - 標準)
+#           XL = Extra Large (200% - 大規模)
+#
 #   mode    Generation mode (1-3)
-#           1 = Single Domain - Generate problems for one specific math domain
-#           2 = All Domains - Generate complete dataset (44K problems total)
+#           1 = All Domains - Generate complete dataset with ratio applied
+#           2 = Single Domain - Generate problems for one specific math domain
 #           3 = Custom Selection - Choose multiple domains interactively
 #
-#   domain  Domain selection for mode 1 (1-6)
-#           1 = Algebra (10K problems recommended)
-#           2 = Calculus (10K problems recommended)
-#           3 = Geometry (6K problems recommended)
-#           4 = Statistics (6K problems recommended)
-#           5 = Number Theory (4K problems recommended)
-#           6 = Discrete Mathematics (8K problems recommended)
-#
-#   count   Number of problems to generate (optional)
-#           If not specified, uses recommended count for the domain
+#   domain  Domain selection for mode 2 (1-6)
+#           1 = Algebra (default: 10K)
+#           2 = Calculus (default: 10K)
+#           3 = Geometry (default: 6K)
+#           4 = Statistics (default: 6K)
+#           5 = Number Theory (default: 4K)
+#           6 = Discrete Mathematics (default: 8K)
 #
 # EXAMPLES:
 #   # Interactive mode (asks all questions)
 #   ./run_math_generation.sh
 #
-#   # Generate algebra problems with DeepSeek-R1-Distill-Qwen-32B
-#   ./run_math_generation.sh 1 1 1
+#   # Generate all domains with DeepSeek-R1-Distill-Qwen-32B at Large scale (44K)
+#   ./run_math_generation.sh 1 L 1
 #
-#   # Generate all domains with Qwen2.5-Math-72B
-#   ./run_math_generation.sh 5 2
+#   # Generate all domains with Qwen2.5-Math-72B at Medium scale
+#   ./run_math_generation.sh 5 M 1
 #
-#   # Generate 5000 calculus problems with DeepSeek-R1-Distill-Llama-70B
-#   ./run_math_generation.sh 2 1 2 5000
+#   # Generate calculus problems with DeepSeek-R1-Distill-Llama-70B at Medium scale (5K)
+#   ./run_math_generation.sh 2 M 2 2
 #
 #   # Show help
 #   ./run_math_generation.sh -h
@@ -64,6 +67,33 @@
 #   - Each run creates timestamped output files
 
 set -e
+
+# Function to round to nearest 10
+round_to_10() {
+    local num=$1
+    echo $(( (num + 5) / 10 * 10 ))
+}
+
+# Function to convert scale to ratio
+scale_to_ratio() {
+    local scale=$1
+    case $scale in
+        S|s) echo "0.1";;
+        M|m) echo "0.5";;
+        L|l) echo "1.0";;
+        XL|xl|X|x) echo "2.0";;
+        *) echo "$scale";;  # fallback to numeric input
+    esac
+}
+
+# Function to calculate problem count with scale
+calculate_count() {
+    local base_count=$1
+    local scale=$2
+    local ratio=$(scale_to_ratio $scale)
+    local result=$(echo "$base_count * $ratio" | bc | cut -d. -f1)
+    round_to_10 $result
+}
 
 # Color output
 RED='\033[0;31m'
@@ -79,7 +109,7 @@ if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
     echo "Magpie Math Dataset Generator - 使い方ガイド"
     echo ""
     echo "使い方:"
-    echo "  ./run_math_generation.sh [モデル番号] [モード番号] [ドメイン番号] [問題数]"
+    echo "  ./run_math_generation.sh [モデル番号] [生成倍率] [モード番号] [ドメイン番号]"
     echo ""
     echo "モデル番号:"
     echo "  1 = DeepSeek-R1-Distill-Qwen-32B（推奨・バランス型）"
@@ -89,12 +119,19 @@ if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
     echo "  5 = Qwen2.5-Math-72B-Instruct（数学特化）"
     echo "  6 = Qwen2.5-Coder-32B-Instruct（計算数学特化）"
     echo ""
+    echo "生成倍率:"
+    echo "  0.1 = デフォルトの10%（例：全ドメイン4.4K問題）"
+    echo "  0.5 = デフォルトの50%（例：全ドメイン22K問題）"
+    echo "  1.0 = デフォルトの100%（例：全ドメイン44K問題）"
+    echo "  2.0 = デフォルトの200%（例：全ドメイン88K問題）"
+    echo "  ※10の位で四捨五入されます"
+    echo ""
     echo "モード番号:"
-    echo "  1 = 単一ドメイン生成"
-    echo "  2 = 全ドメイン生成（44K問題）"
+    echo "  1 = 全ドメイン生成（44K問題）"
+    echo "  2 = 単一ドメイン生成"
     echo "  3 = カスタム選択（対話モードのみ）"
     echo ""
-    echo "ドメイン番号（モード1の場合）:"
+    echo "ドメイン番号（モード2の場合）:"
     echo "  1 = 代数（10K問題推奨）"
     echo "  2 = 微積分（10K問題推奨）"
     echo "  3 = 幾何（6K問題推奨）"
@@ -104,24 +141,23 @@ if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
     echo ""
     echo "例:"
     echo "  ./run_math_generation.sh              # 対話モード"
-    echo "  ./run_math_generation.sh 1 1 1        # DeepSeek-Qwen-32Bで代数生成"
-    echo "  ./run_math_generation.sh 5 2          # Qwen-Math-72Bで全ドメイン生成"
-    echo "  ./run_math_generation.sh 2 1 2 5000   # DeepSeek-Llama-70Bで微積分5000問題"
+    echo "  ./run_math_generation.sh 1 1.0 1      # DeepSeek-Qwen-32Bで全ドメイン100%生成"
+    echo "  ./run_math_generation.sh 5 0.5 1      # Qwen-Math-72Bで全ドメイン50%生成"
+    echo "  ./run_math_generation.sh 2 0.5 2 2    # DeepSeek-Llama-70Bで微積分50%生成"
     exit 0
 fi
 
 # Parse command line arguments
 model_choice=$1
-mode_choice=$2
-domain_choice=$3
-custom_count=$4
+model_scale=$2
+mode_choice=$3
+domain_choice=$4
 
 # Check if running in non-interactive mode
-if [ -n "$model_choice" ] && [ -n "$mode_choice" ]; then
+if [ -n "$model_choice" ] && [ -n "$model_scale" ] && [ -n "$mode_choice" ]; then
     echo -e "${GREEN}Running in non-interactive mode${NC}"
-    echo -e "${BLUE}Model: $model_choice, Mode: $mode_choice${NC}"
+    echo -e "${BLUE}Model: $model_choice, Scale: $model_scale, Mode: $mode_choice${NC}"
     [ -n "$domain_choice" ] && echo -e "${BLUE}Domain: $domain_choice${NC}"
-    [ -n "$custom_count" ] && echo -e "${BLUE}Count: $custom_count${NC}"
     echo ""
 else
     # Interactive mode
@@ -132,9 +168,9 @@ else
     echo -e "${GREEN}╚══════════════════════════════════════════════════════════╝${NC}"
     echo ""
     echo -e "${YELLOW}💡 ヒント: 引数を使って直接実行もできます:${NC}"
-    echo -e "${BLUE}   ./run_math_generation.sh 1 1 1        # DeepSeek-Qwen-32Bで代数生成${NC}"
-    echo -e "${BLUE}   ./run_math_generation.sh 5 2          # Qwen-Math-72Bで全ドメイン生成${NC}"
-    echo -e "${BLUE}   ./run_math_generation.sh 2 1 2 5000   # DeepSeek-Llama-70Bで微積分5000問題${NC}"
+    echo -e "${BLUE}   ./run_math_generation.sh 1 1.0 1      # DeepSeek-Qwen-32Bで全ドメイン標準倍率生成${NC}"
+    echo -e "${BLUE}   ./run_math_generation.sh 5 0.5 1      # Qwen-Math-72Bで全ドメイン0.5倍生成${NC}"
+    echo -e "${BLUE}   ./run_math_generation.sh 2 0.5 2 2    # DeepSeek-Llama-70Bで微積分0.5倍生成${NC}"
     echo -e "${BLUE}   ./run_math_generation.sh -h           # 日本語ヘルプを表示${NC}"
     echo ""
 fi
@@ -172,18 +208,70 @@ echo ""
 echo -e "${BLUE}Selected: $MODEL_DESC${NC}"
 echo ""
 
+# Scale selection
+if [ -z "$model_scale" ]; then
+    echo -e "${YELLOW}📊 生成倍率を選択（デフォルト数に対する倍率）:${NC}"
+    echo "0.1 = 10%   (例: 全ドメイン 4,400問)"
+    echo "0.5 = 50%   (例: 全ドメイン 22,000問)"
+    echo "1.0 = 100%  (例: 全ドメイン 44,000問) [推奨]"
+    echo "2.0 = 200%  (例: 全ドメイン 88,000問)"
+    echo ""
+    read -p "生成倍率を入力 (default: 1.0): " model_scale
+    model_scale=${model_scale:-1.0}
+fi
+
+echo -e "${BLUE}生成倍率: ${model_scale}x${NC}"
+echo ""
+
 # Generation mode selection
 if [ -z "$mode_choice" ]; then
     echo -e "${YELLOW}🎯 Select Generation Mode:${NC}"
-    echo "1) Single Domain - Generate one specific math domain"
-    echo "2) All Domains - Generate complete HLE math dataset (44K problems)"
+    echo "1) All Domains - Generate complete HLE math dataset (44K problems)"
+    echo "2) Single Domain - Generate one specific math domain"
     echo "3) Custom Selection - Choose specific domains"
     echo ""
     read -p "Enter choice (1-3): " mode_choice
 fi
 
 case $mode_choice in
-    1) # Single domain
+    1) # All domains
+        echo ""
+        echo -e "${PURPLE}🚀 Starting complete dataset generation...${NC}"
+        echo -e "${BLUE}Model: $MODEL_DESC${NC}"
+        echo -e "${BLUE}生成倍率: ${model_scale}x${NC}"
+        
+        # Calculate totals with scale
+        ALGEBRA_COUNT=$(calculate_count 10000 $model_scale)
+        CALCULUS_COUNT=$(calculate_count 10000 $model_scale)
+        GEOMETRY_COUNT=$(calculate_count 6000 $model_scale)
+        STATISTICS_COUNT=$(calculate_count 6000 $model_scale)
+        NUMBER_THEORY_COUNT=$(calculate_count 4000 $model_scale)
+        DISCRETE_COUNT=$(calculate_count 8000 $model_scale)
+        TOTAL_COUNT=$((ALGEBRA_COUNT + CALCULUS_COUNT + GEOMETRY_COUNT + STATISTICS_COUNT + NUMBER_THEORY_COUNT + DISCRETE_COUNT))
+        
+        echo -e "${BLUE}Total problems: $TOTAL_COUNT${NC}"
+        echo -e "${BLUE}Domains: Algebra ($ALGEBRA_COUNT), Calculus ($CALCULUS_COUNT), Geometry ($GEOMETRY_COUNT), Statistics ($STATISTICS_COUNT), Number Theory ($NUMBER_THEORY_COUNT), Discrete ($DISCRETE_COUNT)${NC}"
+        echo ""
+        
+        # Create temporary script with ratio applied
+        TEMP_SCRIPT=$(mktemp /tmp/generate_all_math_domains_ratio.XXXXXX.sh)
+        cp generate_all_math_domains.sh "$TEMP_SCRIPT"
+        
+        # Replace the domain counts in the temporary script
+        sed -i "s/\[\"algebra\"\]=\"10000\"/[\"algebra\"]=\"$ALGEBRA_COUNT\"/" "$TEMP_SCRIPT"
+        sed -i "s/\[\"calculus\"\]=\"10000\"/[\"calculus\"]=\"$CALCULUS_COUNT\"/" "$TEMP_SCRIPT"
+        sed -i "s/\[\"geometry\"\]=\"6000\"/[\"geometry\"]=\"$GEOMETRY_COUNT\"/" "$TEMP_SCRIPT"
+        sed -i "s/\[\"statistics\"\]=\"6000\"/[\"statistics\"]=\"$STATISTICS_COUNT\"/" "$TEMP_SCRIPT"
+        sed -i "s/\[\"number_theory\"\]=\"4000\"/[\"number_theory\"]=\"$NUMBER_THEORY_COUNT\"/" "$TEMP_SCRIPT"
+        sed -i "s/\[\"discrete\"\]=\"8000\"/[\"discrete\"]=\"$DISCRETE_COUNT\"/" "$TEMP_SCRIPT"
+        sed -i "s/Total problems: 44,000/Total problems: $TOTAL_COUNT/" "$TEMP_SCRIPT"
+        
+        chmod +x "$TEMP_SCRIPT"
+        "$TEMP_SCRIPT" "$MODEL"
+        rm -f "$TEMP_SCRIPT"
+        ;;
+        
+    2) # Single domain
         if [ -z "$domain_choice" ]; then
             echo ""
             echo -e "${YELLOW}📚 Select Math Domain:${NC}"
@@ -207,37 +295,23 @@ case $mode_choice in
             *) echo -e "${RED}Invalid choice${NC}"; exit 1;;
         esac
         
-        if [ -z "$custom_count" ]; then
-            echo ""
-            read -p "Number of problems (default: $RECOMMENDED_COUNT): " custom_count
-        fi
-        PROBLEM_COUNT=${custom_count:-$RECOMMENDED_COUNT}
+        # Calculate problem count with scale
+        PROBLEM_COUNT=$(calculate_count $RECOMMENDED_COUNT $model_scale)
         
         echo ""
         echo -e "${PURPLE}🚀 Starting generation...${NC}"
         echo -e "${BLUE}Model: $MODEL_DESC${NC}"
         echo -e "${BLUE}Domain: $DOMAIN${NC}"
-        echo -e "${BLUE}Problems: $PROBLEM_COUNT${NC}"
+        echo -e "${BLUE}Base count: $RECOMMENDED_COUNT × ${model_scale} = $PROBLEM_COUNT problems${NC}"
         echo ""
         
         ./generate_domain_dataset.sh "$MODEL" "$DOMAIN" "$PROBLEM_COUNT"
         ;;
         
-    2) # All domains
-        echo ""
-        echo -e "${PURPLE}🚀 Starting complete dataset generation...${NC}"
-        echo -e "${BLUE}Model: $MODEL_DESC${NC}"
-        echo -e "${BLUE}Total problems: 44,000${NC}"
-        echo -e "${BLUE}Domains: Algebra (10K), Calculus (10K), Geometry (6K), Statistics (6K), Number Theory (4K), Discrete (8K)${NC}"
-        echo ""
-        
-        ./generate_all_math_domains.sh "$MODEL"
-        ;;
-        
     3) # Custom selection
         if [ -n "$domain_choice" ]; then
             echo -e "${RED}Custom selection mode (3) cannot be used with command line arguments${NC}"
-            echo -e "${RED}Please use mode 1 for single domain or mode 2 for all domains${NC}"
+            echo -e "${RED}Please use mode 1 for all domains or mode 2 for single domain${NC}"
             exit 1
         fi
         echo ""
@@ -267,21 +341,23 @@ case $mode_choice in
         echo ""
         echo -e "${PURPLE}🚀 Starting custom generation...${NC}"
         echo -e "${BLUE}Model: $MODEL_DESC${NC}"
+        echo -e "${BLUE}生成倍率: ${model_scale}x${NC}"
         echo -e "${BLUE}Selected domains: ${SELECTED_DOMAINS[*]}${NC}"
         echo ""
         
         # Generate each selected domain with recommended counts
         for domain in "${SELECTED_DOMAINS[@]}"; do
             case $domain in
-                "algebra") count=10000;;
-                "calculus") count=10000;;
-                "geometry") count=6000;;
-                "statistics") count=6000;;
-                "number_theory") count=4000;;
-                "discrete") count=8000;;
+                "algebra") base_count=10000;;
+                "calculus") base_count=10000;;
+                "geometry") base_count=6000;;
+                "statistics") base_count=6000;;
+                "number_theory") base_count=4000;;
+                "discrete") base_count=8000;;
             esac
             
-            echo -e "${YELLOW}Generating $domain ($count problems)...${NC}"
+            count=$(calculate_count $base_count $model_scale)
+            echo -e "${YELLOW}Generating $domain ($base_count × ${model_scale} = $count problems)...${NC}"
             ./generate_domain_dataset.sh "$MODEL" "$domain" "$count"
         done
         ;;

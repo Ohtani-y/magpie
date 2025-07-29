@@ -1,79 +1,79 @@
-# Validation Report: README vs Code Implementation
+# 検証レポート: README vs コード実装
 
-## Summary
+## 概要
 
-This document details discrepancies found between the README.md documentation and the actual code implementation during comprehensive validation.
+このドキュメントは、包括的な検証中にREADME.mdドキュメントと実際のコード実装の間で発見された不一致を詳述しています。
 
-## ⚠️ Critical Issues Found
+## ⚠️ 発見された重大な問題
 
-### 1. Inconsistent Multi-Response Generation Claims
+### 1. 一貫しない複数応答生成の主張
 
-**Issue**: README claims "7候補応答による精密な品質評価システム" (7-candidate response system) but implementation varies:
+**問題**: READMEでは「7候補応答による精密な品質評価システム」と主張しているが、実装は異なる:
 
-- **Location**: Line 34 in README.md
-- **Reality**: 
-  - Individual model scripts (e.g., `magpie-deepseek-r1-distill-qwen-32b.sh`) generate 5 responses
-  - Domain-specific script (`generate_domain_dataset.sh`) generates 7 responses
-- **Impact**: Users following README examples may get unexpected numbers of responses
+- **場所**: README.mdの34行目
+- **現実**: 
+  - 個別モデルスクリプト（例: `magpie-deepseek-r1-distill-qwen-32b.sh`）は5個の応答を生成
+  - ドメイン特化スクリプト（`generate_domain_dataset.sh`）は7個の応答を生成
+- **影響**: READMEの例に従ったユーザーは予期しない数の応答を取得する可能性がある
 
-### 2. Folder Structure Discrepancy
+### 2. フォルダ構造の不一致
 
-**Issue**: README shows outdated folder structure that doesn't match current implementation:
+**問題**: READMEは現在の実装と一致しない古いフォルダ構造を表示:
 
-- **README Claims**: Line 135 shows `<domain>_ins_5res_armorm.json`
-- **Actual Implementation**: Domain script generates `<domain>_ins_7res_armorm.json`
-- **Impact**: Users looking for specific files may not find them
+- **READMEの主張**: 135行目で`<domain>_ins_5res_armorm.json`を表示
+- **実際の実装**: ドメインスクリプトは`<domain>_ins_7res_armorm.json`を生成
+- **影響**: 特定のファイルを探しているユーザーが見つけられない可能性がある
 
-### 3. Model Configuration Mismatch
+### 3. モデル設定の不一致
 
-**Issue**: README table shows script names that don't exactly match actual files:
+**問題**: READMEテーブルは実際のファイルと完全に一致しないスクリプト名を表示:
 
-- **README Claims**: `./magpie-qwen25-math-72b.sh` (line 78)
-- **Actual File**: `magpie-qwen2.5-math-72b.sh` (dot notation differs)
-- **Impact**: Direct copy-paste commands from README will fail
+- **READMEの主張**: `./magpie-qwen25-math-72b.sh` (78行目)
+- **実際のファイル**: `magpie-qwen2.5-math-72b.sh` (ドット表記が異なる)
+- **影響**: READMEからの直接コピーペーストコマンドが失敗する
 
-## ✅ Verified Correct Implementations
+## ✅ 検証済み正常実装
 
-### 1. All 6 Models Properly Supported
-- All 6 models mentioned in README table exist in configs and have working scripts
-- Domain-specific templates are properly implemented for all domains
+### 1. 全6モデルが適切にサポート
+- READMEテーブルに記載された全6モデルが設定に存在し、動作するスクリプトを持つ
+- 全ドメインに対してドメイン特化テンプレートが適切に実装されている
 
-### 2. Advanced Features Working
-- 1024/4096 token limits properly implemented in domain generation script
-- Domain-specific temperature settings match advanced difficulty claims
-- All 6 mathematical domains (algebra, calculus, geometry, statistics, number_theory, discrete) properly supported
+### 2. 高度機能が動作
+- 1024/4096トークン制限がドメイン生成スクリプトで適切に実装
+- ドメイン特化温度設定が高度難易度の主張と一致
+- 全6数学ドメイン（代数、微積分、幾何、統計、数論、離散）が適切にサポート
 
-### 3. Core Architecture Intact
-- All core generation files exist and match descriptions
-- Requirements.txt contains necessary dependencies
-- Interactive menu system works as documented
+### 3. コアアーキテクチャが完全
+- 全コア生成ファイルが存在し、説明と一致
+- Requirements.txtに必要な依存関係が含まれている
+- 対話式メニューシステムがドキュメント通りに動作
 
-## 🔧 Minor Issues
+## 🔧 軽微な問題
 
-### 1. Documentation Language Inconsistency
-- Some scripts use English comments, others use Japanese
-- Mixed language in output messages
+### 1. ドキュメント言語の不一致
+- 一部のスクリプトは英語コメント、他は日本語を使用
+- 出力メッセージで言語が混在
 
-### 2. File Naming Patterns
-- Some inconsistency between README examples and actual generated file names
-- Multiple timestamp formats used across different components
+### 2. ファイル命名パターン
+- README例と実際に生成されるファイル名の間に一部不一致
+- 異なるコンポーネント間で複数のタイムスタンプ形式を使用
 
-## 📋 Recommendations
+## 📋 推奨事項
 
-### Immediate Actions Needed:
-1. **Update README Line 34**: Change "7候補応答" to clarify that response count varies by generation method
-2. **Fix README Line 135**: Update file naming pattern to reflect current implementation
-3. **Standardize Script Names**: Ensure README examples exactly match actual script names
+### 即座に必要なアクション:
+1. **README 34行目を更新**: "7候補応答"を変更して、応答数が生成方法によって異なることを明確化
+2. **README 135行目を修正**: 現在の実装を反映するようファイル命名パターンを更新
+3. **スクリプト名を標準化**: README例が実際のスクリプト名と完全に一致するよう確保
 
-### Quality Improvements:
-1. **Standardize Language**: Choose either English or Japanese for all documentation
-2. **Update Folder Structure Diagram**: Lines 237-272 need updates to reflect current implementation
-3. **Add Clear Usage Examples**: Include actual working command examples with correct file paths
+### 品質改善:
+1. **言語を標準化**: 全ドキュメントで英語または日本語のいずれかを選択
+2. **フォルダ構造図を更新**: 237-272行を現在の実装を反映するよう更新
+3. **明確な使用例を追加**: 正しいファイルパスを含む実際に動作するコマンド例を含める
 
-## 🚀 Overall Assessment
+## 🚀 総合評価
 
-**Status**: ✅ MOSTLY COMPLIANT
+**ステータス**: ✅ ほぼ準拠
 
-The codebase largely delivers on README promises with advanced mathematical reasoning capabilities, proper model support, and sophisticated domain-specific generation. The discrepancies found are primarily documentation issues rather than functional problems.
+コードベースは、高度な数学推論能力、適切なモデルサポート、洗練されたドメイン特化生成により、READMEの約束をほぼ実現している。発見された不一致は主に機能的問題ではなくドキュメント問題である。
 
-**Confidence Level**: 95% - Core functionality works as advertised, with minor documentation inconsistencies that should be addressed for user experience.
+**信頼度レベル**: 95% - コア機能は宣伝通りに動作し、ユーザー体験のために対処すべき軽微なドキュメント不一致がある。
