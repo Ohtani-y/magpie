@@ -2,7 +2,14 @@
 
 # Gemma 3 27B-it - Math Dataset Generation Script
 
-MODEL_PATH="${1:-google/gemma-3-27b-it}"
+# Require explicit model path argument
+if [ -z "$1" ]; then
+    echo "❌ エラー: モデルパスが指定されていません"
+    echo "📋 使用方法: $0 <model_path> [total_prompts] [ins_topp] [ins_temp] [res_topp] [res_temp]"
+    echo "💡 例: $0 google/gemma-3-27b-it 1000"
+    exit 1
+fi
+MODEL_PATH="$1"
 TOTAL_PROMPTS="${2:-1000}"
 INS_TOPP="${3:-1.0}"
 INS_TEMP="${4:-1.2}"

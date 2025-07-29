@@ -1,6 +1,18 @@
 # 汎用数学データ生成スクリプト
 
-model_path=${1:-"Qwen/Qwen2.5-3B-Instruct"}  # モデル名を引数として受け取る(入力しない場合のデフォルトはQwen/Qwen2.5-3B-Instruct)
+# 引数チェック - デフォルト値による意図しない実行を防ぐ
+if [ -z "$1" ]; then
+    echo "❌ エラー: モデルパスが指定されていません"
+    echo "📋 使用方法: $0 <model_path> [total_prompts] [control_tasks] [ins_topp] [ins_temp] [res_topp] [res_temp]"
+    echo "📝 例: $0 deepseek-ai/DeepSeek-R1-Distill-Qwen-32B 1000 math 1 1 1 0"
+    echo "🔧 利用可能なモデル例:"
+    echo "  - deepseek-ai/DeepSeek-R1-Distill-Qwen-32B"
+    echo "  - deepseek-ai/DeepSeek-R1-Distill-Llama-70B"
+    echo "  - Qwen/Qwen2.5-Math-72B-Instruct"
+    exit 1
+fi
+
+model_path="$1"  # モデル名を引数として受け取る（必須）
 total_prompts=${2:-1000}  # 生成する問題数を引数として受け取る(入力しない場合のデフォルトは1000)
 control_tasks=${3:-"math"}  # テンプレートを指定する単語を引数として受け取る（math、code、translation、probabilityなど）（7/25引数追加）
 ins_topp=${4:-1}  # 指示生成のtop_pを引数として受け取る(入力しない場合のデフォルトは1)

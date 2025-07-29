@@ -2,7 +2,14 @@
 
 # Qwen2.5-Math-72B-Instruct - Math Dataset Generation Script
 
-MODEL_PATH="${1:-Qwen/Qwen2.5-Math-72B-Instruct}"
+# Require explicit model path argument
+if [ -z "$1" ]; then
+    echo "❌ エラー: モデルパスが指定されていません"
+    echo "📋 使用方法: $0 <model_path> [total_prompts] [ins_topp] [ins_temp] [res_topp] [res_temp]"
+    echo "💡 例: $0 Qwen/Qwen2.5-Math-72B-Instruct 1000"
+    exit 1
+fi
+MODEL_PATH="$1"
 TOTAL_PROMPTS="${2:-1000}"
 INS_TOPP="${3:-1.0}"
 INS_TEMP="${4:-1.0}"

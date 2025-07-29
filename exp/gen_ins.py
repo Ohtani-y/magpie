@@ -123,9 +123,29 @@ def main():
     
     
     # Obtain config from configs/model_configs.json
-    with open("../configs/model_configs.json", "r", encoding="utf-8") as f:
-        model_configs = json.load(f)
-        model_config = model_configs[args.model_path]
+    try:
+        with open("../configs/model_configs.json", "r", encoding="utf-8") as f:
+            model_configs = json.load(f)
+            if args.model_path not in model_configs:
+                print(f"❌ エラー: モデル '{args.model_path}' が model_configs.json に見つかりません")
+                print(f"📋 利用可能なモデル:")
+                for model in sorted(model_configs.keys()):
+                    print(f"  - {model}")
+                print(f"\n🔧 解決方法: model_configs.json にモデル設定を追加するか、正しいモデル名を指定してください")
+                sys.exit(1)
+            model_config = model_configs[args.model_path]
+            print(f"✅ モデル設定を正常に読み込みました: {args.model_path}")
+    except FileNotFoundError:
+        print(f"❌ エラー: model_configs.json ファイルが見つかりません")
+        print(f"📁 現在のディレクトリ: {os.getcwd()}")
+        print(f"🔍 期待されるパス: ../configs/model_configs.json")
+        sys.exit(1)
+    except json.JSONDecodeError as e:
+        print(f"❌ エラー: model_configs.json の JSON 形式が不正です: {e}")
+        sys.exit(1)
+    except Exception as e:
+        print(f"❌ 予期しないエラーが発生しました: {e}")
+        sys.exit(1)
         if args.control_tasks:
             pre_query_template = model_config[f"pre_query_template_{args.control_tasks}"]
             print(f"制御タスク: {args.control_tasks} (HLE数学対策特化)")

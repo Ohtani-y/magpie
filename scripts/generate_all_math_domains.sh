@@ -76,15 +76,46 @@ for domain in "${!DOMAINS[@]}"; do
     
     echo -e "\n${PURPLE}🎯 Generating $domain dataset (${count} problems)${NC}"
     echo -e "${BLUE}Description: $description${NC}"
+    echo -e "${YELLOW}📝 Expected model: $MODEL_PATH${NC}"
+    echo -e "${YELLOW}📁 Expected folder pattern: ${MODEL_NAME}_${domain}_*${NC}"
+    
+    # Record start time for this domain generation
+    DOMAIN_START_TIME=$(date +%s)
     
     # Call the domain-specific generation script
-    ./generate_domain_dataset.sh "$MODEL_PATH" "$domain" "$count"
+    echo -e "${BLUE}🚀 Starting generation for $domain...${NC}"
+    if ! ./generate_domain_dataset.sh "$MODEL_PATH" "$domain" "$count"; then
+        echo -e "${RED}❌ Error: Failed to generate $domain dataset${NC}"
+        echo -e "${RED}🚫 Stopping execution to prevent incorrect folder processing${NC}"
+        exit 1
+    fi
     
-    # Move the generated directory to our base directory
-    DOMAIN_OUTPUT=$(find ../data -name "${MODEL_NAME}_${domain}_*" -type d | head -1)
+    # Find the generated directory with strict validation
+    echo -e "${YELLOW}🔍 Searching for generated folder...${NC}"
+    
+    # More precise search: exact model name + domain + timestamp pattern
+    # Only look for directories created after we started this domain generation
+    DOMAIN_OUTPUT=$(find ../data -name "${MODEL_NAME}_${domain}_[0-9]*" -type d -newermt "@$DOMAIN_START_TIME" 2>/dev/null | head -1)
+    
     if [ -n "$DOMAIN_OUTPUT" ]; then
-        mv "$DOMAIN_OUTPUT" "$BASE_OUTPUT_DIR/${domain}"
-        echo -e "${GREEN}✓ Moved to $BASE_OUTPUT_DIR/${domain}${NC}"
+        # Validate that this is actually the correct folder
+        FOLDER_BASENAME=$(basename "$DOMAIN_OUTPUT")
+        if [[ "$FOLDER_BASENAME" =~ ^${MODEL_NAME}_${domain}_[0-9]{8}_[0-9]{6}$ ]]; then
+            echo -e "${GREEN}✅ Found valid folder: $FOLDER_BASENAME${NC}"
+            mv "$DOMAIN_OUTPUT" "$BASE_OUTPUT_DIR/${domain}"
+            echo -e "${GREEN}✓ Moved to $BASE_OUTPUT_DIR/${domain}${NC}"
+        else
+            echo -e "${RED}❌ Warning: Found folder but pattern doesn't match expected format${NC}"
+            echo -e "${RED}   Found: $FOLDER_BASENAME${NC}"
+            echo -e "${RED}   Expected pattern: ${MODEL_NAME}_${domain}_YYYYMMDD_HHMMSS${NC}"
+            echo -e "${RED}🚫 Skipping to prevent incorrect processing${NC}"
+        fi
+    else
+        echo -e "${RED}❌ Error: No output folder found for $domain${NC}"
+        echo -e "${RED}   Expected pattern: ${MODEL_NAME}_${domain}_*${NC}"
+        echo -e "${RED}   Search path: ../data${NC}"
+        echo -e "${RED}🚫 Stopping execution${NC}"
+        exit 1
     fi
 done
 

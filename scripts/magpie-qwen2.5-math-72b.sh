@@ -1,4 +1,11 @@
-model_path=${1:-"Qwen/Qwen2.5-Math-72B-Instruct"}
+# Require explicit model path argument
+if [ -z "$1" ]; then
+    echo "❌ エラー: モデルパスが指定されていません"
+    echo "📋 使用方法: $0 <model_path> [total_prompts] [ins_topp] [ins_temp] [res_topp] [res_temp]"
+    echo "💡 例: $0 Qwen/Qwen2.5-Math-72B-Instruct 1000"
+    exit 1
+fi
+model_path="$1"
 total_prompts=${2:-1000}
 ins_topp=${3:-0.9}
 ins_temp=${4:-0.6}
