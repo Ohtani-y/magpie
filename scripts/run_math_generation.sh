@@ -255,7 +255,7 @@ case $mode_choice in
         
         # Create temporary script with ratio applied
         TEMP_SCRIPT=$(mktemp /tmp/generate_all_math_domains_ratio.XXXXXX.sh)
-        cp generate_all_math_domains.sh "$TEMP_SCRIPT"
+        cp "$(dirname "$0")/generate_all_math_domains.sh" "$TEMP_SCRIPT"
         
         # Replace the domain counts in the temporary script
         sed -i "s/\[\"algebra\"\]=\"10000\"/[\"algebra\"]=\"$ALGEBRA_COUNT\"/" "$TEMP_SCRIPT"
@@ -305,7 +305,7 @@ case $mode_choice in
         echo -e "${BLUE}Base count: $RECOMMENDED_COUNT × ${model_scale} = $PROBLEM_COUNT problems${NC}"
         echo ""
         
-        ./generate_domain_dataset.sh "$MODEL" "$DOMAIN" "$PROBLEM_COUNT"
+        "$(dirname "$0")/generate_domain_dataset.sh" "$MODEL" "$DOMAIN" "$PROBLEM_COUNT"
         ;;
         
     3) # Custom selection
@@ -358,7 +358,7 @@ case $mode_choice in
             
             count=$(calculate_count $base_count $model_scale)
             echo -e "${YELLOW}Generating $domain ($base_count × ${model_scale} = $count problems)...${NC}"
-            ./generate_domain_dataset.sh "$MODEL" "$domain" "$count"
+            "$(dirname "$0")/generate_domain_dataset.sh" "$MODEL" "$domain" "$count"
         done
         ;;
         

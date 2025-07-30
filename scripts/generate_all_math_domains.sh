@@ -84,7 +84,7 @@ for domain in "${!DOMAINS[@]}"; do
     
     # Call the domain-specific generation script
     echo -e "${BLUE}🚀 Starting generation for $domain...${NC}"
-    if ! ./generate_domain_dataset.sh "$MODEL_PATH" "$domain" "$count"; then
+    if ! "$(dirname "$0")/generate_domain_dataset.sh" "$MODEL_PATH" "$domain" "$count"; then
         echo -e "${RED}❌ Error: Failed to generate $domain dataset${NC}"
         echo -e "${RED}🚫 Stopping execution to prevent incorrect folder processing${NC}"
         exit 1
