@@ -35,6 +35,38 @@ cd scripts
 - **🤖 6モデル対応**: DeepSeek R1 Distill、Gemma 3、Qwen2.5シリーズに最適化
 - **📊 完全パイプライン**: SFTデータと嗜好データを一度に生成
 
+## ⚙️ GPU設定（重要）
+
+### 自動GPU設定（推奨）
+
+**初回実行前に必ずGPU設定を行ってください：**
+
+```bash
+# 自動設定（推奨）
+./scripts/configure_gpu.sh --auto
+
+# 対話式設定
+./scripts/configure_gpu.sh
+```
+
+**GPU構成別の推奨設定：**
+- **1 GPU (24GB+)**: 小〜中型モデル（32B以下）
+- **2 GPU (48GB+)**: 中型モデル（32B）+ 一部大型モデル
+- **4 GPU (80GB+)**: 全モデル対応（70B+推奨）
+
+**設定内容：**
+- `tensor_parallel_size`: GPU並列数の自動調整
+- `gpu_memory_utilization`: メモリ使用率の最適化
+- バックアップファイル自動作成
+
+**設定復元：**
+```bash
+# 元の設定に戻す
+cp scripts/generate_domain_dataset.sh.backup scripts/generate_domain_dataset.sh
+```
+
+---
+
 ## 📋 使い方
 
 ### 基本的な使い方
