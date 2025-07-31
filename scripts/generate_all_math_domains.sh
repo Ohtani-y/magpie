@@ -35,12 +35,12 @@ fi
 
 # Domain configuration with recommended problem counts
 declare -A DOMAINS=(
-    ["algebra"]="10000"
-    ["calculus"]="10000"
-    ["geometry"]="6000"
-    ["statistics"]="6000"
-    ["number_theory"]="4000"
-    ["discrete"]="8000"
+    ["algebra"]="${MAGPIE_ALGEBRA_COUNT:-10000}"
+    ["calculus"]="${MAGPIE_CALCULUS_COUNT:-10000}"
+    ["geometry"]="${MAGPIE_GEOMETRY_COUNT:-6000}"
+    ["statistics"]="${MAGPIE_STATISTICS_COUNT:-6000}"
+    ["number_theory"]="${MAGPIE_NUMBER_THEORY_COUNT:-4000}"
+    ["discrete"]="${MAGPIE_DISCRETE_COUNT:-8000}"
 )
 
 # Domain descriptions
@@ -57,9 +57,15 @@ TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
 MODEL_NAME=$(basename "$MODEL_PATH")
 BASE_OUTPUT_DIR="../data/${MODEL_NAME}_AllDomains_${TIMESTAMP}"
 
+# Calculate total problems dynamically
+TOTAL_PROBLEMS=0
+for domain in "${!DOMAINS[@]}"; do
+    TOTAL_PROBLEMS=$((TOTAL_PROBLEMS + ${DOMAINS[$domain]}))
+done
+
 echo -e "${BLUE}Configuration:${NC}"
 echo "  Model: $MODEL_PATH"
-echo "  Total problems: 44,000"
+echo "  Total problems: $TOTAL_PROBLEMS"
 echo "  Domains: ${!DOMAINS[@]}"
 echo "  Base output directory: $BASE_OUTPUT_DIR"
 echo ""

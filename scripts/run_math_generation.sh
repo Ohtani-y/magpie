@@ -17,13 +17,14 @@
 #   -h, --help     Show this help message and exit
 #
 # ARGUMENTS:
-#   model   Model selection (1-6)
+#   model   Model selection (1-6,8)
 #           1 = DeepSeek-R1-Distill-Qwen-32B (Recommended, balanced performance)
 #           2 = DeepSeek-R1-Distill-Llama-70B (High performance, requires A100)
 #           3 = DeepSeek-R1-0528-FP4 (Memory efficient with FP4 quantization)
 #           4 = Gemma-3-27B-it (Google's latest model)
 #           5 = Qwen2.5-Math-72B-Instruct (Mathematics specialist)
 #           6 = Qwen2.5-Coder-32B-Instruct (Computational mathematics focus)
+#           8 = Qwen2.5-3B-Instruct (Test model, lightweight)
 #
 #   scale   Generation scale (S/M/L/XL)
 #           S  = Small (10% - テスト用)
@@ -118,6 +119,7 @@ if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
     echo "  4 = Gemma-3-27B-it（Google製）"
     echo "  5 = Qwen2.5-Math-72B-Instruct（数学特化）"
     echo "  6 = Qwen2.5-Coder-32B-Instruct（計算数学特化）"
+    echo "  8 = Qwen2.5-3B-Instruct（テスト用・軽量）"
     echo ""
     echo "生成倍率:"
     echo "  0.1 = デフォルトの10%（例：全ドメイン4.4K問題）"
@@ -184,8 +186,9 @@ if [ -z "$model_choice" ]; then
     echo "4) Gemma-3-27B-it (Google model)"
     echo "5) Qwen2.5-Math-72B-Instruct (Math specialist)"
     echo "6) Qwen2.5-Coder-32B-Instruct (Computational math focus)"
+    echo "8) Qwen2.5-3B-Instruct (Test model - Lightweight)"
     echo ""
-    read -p "Enter choice (1-6): " model_choice
+    read -p "Enter choice (1-6,8): " model_choice
 fi
 
 case $model_choice in
@@ -201,6 +204,8 @@ case $model_choice in
        MODEL_DESC="Qwen2.5 Math 72B";;
     6) MODEL="Qwen/Qwen2.5-Coder-32B-Instruct"
        MODEL_DESC="Qwen2.5 Coder 32B";;
+    8) MODEL="Qwen/Qwen2.5-3B-Instruct"
+       MODEL_DESC="Qwen2.5 3B (Test)";;
     *) echo -e "${RED}Invalid choice${NC}"; exit 1;;
 esac
 
@@ -253,22 +258,20 @@ case $mode_choice in
         echo -e "${BLUE}Domains: Algebra ($ALGEBRA_COUNT), Calculus ($CALCULUS_COUNT), Geometry ($GEOMETRY_COUNT), Statistics ($STATISTICS_COUNT), Number Theory ($NUMBER_THEORY_COUNT), Discrete ($DISCRETE_COUNT)${NC}"
         echo ""
         
-        # Create temporary script with ratio applied
-        TEMP_SCRIPT=$(mktemp /tmp/generate_all_math_domains_ratio.XXXXXX.sh)
-        cp "$(dirname "$0")/generate_all_math_domains.sh" "$TEMP_SCRIPT"
+        # Pass counts as environment variables instead of creating temp file
+        export MAGPIE_ALGEBRA_COUNT="$ALGEBRA_COUNT"
+        export MAGPIE_CALCULUS_COUNT="$CALCULUS_COUNT"
+        export MAGPIE_GEOMETRY_COUNT="$GEOMETRY_COUNT"
+        export MAGPIE_STATISTICS_COUNT="$STATISTICS_COUNT"
+        export MAGPIE_NUMBER_THEORY_COUNT="$NUMBER_THEORY_COUNT"
+        export MAGPIE_DISCRETE_COUNT="$DISCRETE_COUNT"
         
-        # Replace the domain counts in the temporary script
-        sed -i "s/\[\"algebra\"\]=\"10000\"/[\"algebra\"]=\"$ALGEBRA_COUNT\"/" "$TEMP_SCRIPT"
-        sed -i "s/\[\"calculus\"\]=\"10000\"/[\"calculus\"]=\"$CALCULUS_COUNT\"/" "$TEMP_SCRIPT"
-        sed -i "s/\[\"geometry\"\]=\"6000\"/[\"geometry\"]=\"$GEOMETRY_COUNT\"/" "$TEMP_SCRIPT"
-        sed -i "s/\[\"statistics\"\]=\"6000\"/[\"statistics\"]=\"$STATISTICS_COUNT\"/" "$TEMP_SCRIPT"
-        sed -i "s/\[\"number_theory\"\]=\"4000\"/[\"number_theory\"]=\"$NUMBER_THEORY_COUNT\"/" "$TEMP_SCRIPT"
-        sed -i "s/\[\"discrete\"\]=\"8000\"/[\"discrete\"]=\"$DISCRETE_COUNT\"/" "$TEMP_SCRIPT"
-        sed -i "s/Total problems: 44,000/Total problems: $TOTAL_COUNT/" "$TEMP_SCRIPT"
+        # Call the original script directly
+        "$(dirname "$0")/generate_all_math_domains.sh" "$MODEL"
         
-        chmod +x "$TEMP_SCRIPT"
-        "$TEMP_SCRIPT" "$MODEL"
-        rm -f "$TEMP_SCRIPT"
+        # Clean up environment variables
+        unset MAGPIE_ALGEBRA_COUNT MAGPIE_CALCULUS_COUNT MAGPIE_GEOMETRY_COUNT
+        unset MAGPIE_STATISTICS_COUNT MAGPIE_NUMBER_THEORY_COUNT MAGPIE_DISCRETE_COUNT
         ;;
         
     2) # Single domain

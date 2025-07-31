@@ -1,4 +1,4 @@
-# Usage Guide for run_math_generation.sh with Command Line Arguments
+# Usage Guide for run_math_generation.sh
 
 ## Interactive Mode (default)
 ./run_math_generation.sh
@@ -6,42 +6,51 @@
 ## Non-Interactive Mode with Arguments
 
 ### Format:
-./run_math_generation.sh <model_choice> <mode_choice> [domain_choice] [custom_count]
+./run_math_generation.sh <model_choice> <scale> <mode_choice> [domain_choice]
 
 ### Examples:
 
-1. Generate algebra problems using DeepSeek-R1-Distill-Qwen-32B (Single domain mode):
-   ./run_math_generation.sh 1 1 1
+1. Generate all domains using DeepSeek-R1-Distill-Qwen-32B at 10% scale:
+   ./run_math_generation.sh 1 0.1 1
    # Model 1 = DeepSeek-R1-Distill-Qwen-32B
-   # Mode 1 = Single Domain
-   # Domain 1 = Algebra (uses default 10K problems)
+   # Scale 0.1 = 10% of default (4.4K problems total)
+   # Mode 1 = All Domains
 
-2. Generate all domains using Qwen2.5-Math-72B:
-   ./run_math_generation.sh 5 2
+2. Generate algebra problems using Qwen2.5-Math-72B at full scale:
+   ./run_math_generation.sh 5 1.0 2 1
    # Model 5 = Qwen2.5-Math-72B-Instruct
-   # Mode 2 = All Domains (44K problems total)
+   # Scale 1.0 = 100% (10K problems)
+   # Mode 2 = Single Domain
+   # Domain 1 = Algebra
 
-3. Generate 5000 calculus problems using DeepSeek-R1-Distill-Llama-70B:
-   ./run_math_generation.sh 2 1 2 5000
-   # Model 2 = DeepSeek-R1-Distill-Llama-70B
-   # Mode 1 = Single Domain
-   # Domain 2 = Calculus
-   # 5000 = Custom problem count
+3. Generate all domains using test model at 50% scale:
+   ./run_math_generation.sh 8 0.5 1
+   # Model 8 = Qwen2.5-3B-Instruct (Test model)
+   # Scale 0.5 = 50% of default (22K problems total)
+   # Mode 1 = All Domains
 
 ### Model Choices:
-1 = DeepSeek-R1-Distill-Qwen-32B
-2 = DeepSeek-R1-Distill-Llama-70B
-3 = DeepSeek-R1-0528-FP4
-4 = Gemma-3-27B-it
-5 = Qwen2.5-Math-72B-Instruct
-6 = Qwen2.5-Coder-32B-Instruct
+1 = DeepSeek-R1-Distill-Qwen-32B (Recommended - Balanced performance)
+2 = DeepSeek-R1-Distill-Llama-70B (High performance - Requires A100)
+3 = DeepSeek-R1-0528-FP4 (Memory efficient - FP4 quantized)
+4 = Gemma-3-27B-it (Google model)
+5 = Qwen2.5-Math-72B-Instruct (Math specialist)
+6 = Qwen2.5-Coder-32B-Instruct (Computational math focus)
+8 = Qwen2.5-3B-Instruct (Test model - Lightweight)
+
+### Scale Options:
+0.1 = 10% of default (Small - for testing)
+0.5 = 50% of default (Medium - for development)
+1.0 = 100% of default (Large - standard)
+2.0 = 200% of default (Extra Large - comprehensive)
+Note: Problem counts are rounded to nearest 10
 
 ### Mode Choices:
-1 = Single Domain
-2 = All Domains
-3 = Custom Selection (not supported in non-interactive mode)
+1 = All Domains - Generate complete dataset with scale applied
+2 = Single Domain - Generate problems for one specific math domain
+3 = Custom Selection - Choose multiple domains interactively (interactive mode only)
 
-### Domain Choices (for mode 1):
+### Domain Choices (for mode 2):
 1 = Algebra (10K default)
 2 = Calculus (10K default)
 3 = Geometry (6K default)
