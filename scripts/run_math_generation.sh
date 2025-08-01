@@ -72,7 +72,16 @@ set -e
 # Function to round to nearest 10
 round_to_10() {
     local num=$1
-    echo $(( (num + 5) / 10 * 10 ))
+    if [ "$num" -le 0 ]; then
+        echo 10  # 最小値を10に設定
+    else
+        local rounded=$(( (num + 5) / 10 * 10 ))
+        if [ "$rounded" -le 0 ]; then
+            echo 10  # 0以下の場合は10に設定
+        else
+            echo $rounded
+        fi
+    fi
 }
 
 # Function to convert scale to ratio

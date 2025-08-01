@@ -148,10 +148,19 @@ def main():
         sys.exit(1)
     
     if args.control_tasks:
-        pre_query_template = model_config[f"pre_query_template_{args.control_tasks}"]
-        print(f"制御タスク: {args.control_tasks} (HLE数学対策特化)")
         if args.domain:
             print(f"ドメイン特化: {args.domain}")
+            # ドメイン特化テンプレートを優先使用
+            domain_template_key = f"pre_query_template_{args.domain}"
+            if domain_template_key in model_config:
+                pre_query_template = model_config[domain_template_key]
+                print(f"ドメイン特化テンプレート使用: {args.domain}")
+            else:
+                pre_query_template = model_config[f"pre_query_template_{args.control_tasks}"]
+                print(f"ドメイン特化テンプレートが見つかりません。汎用テンプレート使用: {args.control_tasks}")
+        else:
+            pre_query_template = model_config[f"pre_query_template_{args.control_tasks}"]
+            print(f"制御タスク: {args.control_tasks} (HLE数学対策特化)")
     elif args.system_prompt:
         pre_query_template = model_config["pre_query_template_with_system_prompt"]
         print("システムプロンプト有効。注意: システムプロンプトは性能を低下させる可能性があります。")
