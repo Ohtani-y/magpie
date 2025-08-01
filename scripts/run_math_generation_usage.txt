@@ -1,59 +1,109 @@
-# Usage Guide for run_math_generation.sh
+# run_math_generation.sh 使い方ガイド
 
-## Interactive Mode (default)
+## 基本的な使い方
+
+```bash
+./run_math_generation.sh [モデル番号] [生成倍率] [モード番号] [ドメイン番号]
+```
+
+## 引数の説明
+
+### モデル番号（必須）
+1 = DeepSeek-R1-Distill-Qwen-32B（推奨・バランス型）
+2 = DeepSeek-R1-Distill-Llama-70B（高性能・A100必須）
+3 = DeepSeek-R1-0528-FP4（メモリ効率型）
+4 = Gemma-3-27B-it（Google製）
+5 = Qwen2.5-Math-72B-Instruct（数学特化）
+6 = Qwen2.5-Coder-32B-Instruct（計算数学特化）
+8 = Qwen2.5-3B-Instruct（テスト用・軽量）
+
+### 生成倍率（必須）
+デフォルト問題数に対する倍率を指定します：
+- 0.1 = 10%（テスト用・小規模）
+- 0.5 = 50%（開発用・中規模）
+- 1.0 = 100%（標準・大規模）
+- 2.0 = 200%（包括的・超大規模）
+※10の位で四捨五入されます
+
+### モード番号（必須）
+1 = 全ドメイン生成（生成倍率適用）
+2 = 単一ドメイン生成
+3 = カスタム選択（対話モードのみ）
+
+### ドメイン番号（モード2の場合のみ）
+1 = 代数（10K問題推奨）
+2 = 微積分（10K問題推奨）
+3 = 幾何（6K問題推奨）
+4 = 統計（6K問題推奨）
+5 = 数論（4K問題推奨）
+6 = 離散数学（8K問題推奨）
+
+
+## 具体例
+
+### 例1: DeepSeek-Qwen-32Bで全ドメイン10%（テスト用）を生成
+```bash
+./run_math_generation.sh 1 0.1 1
+```
+- モデル1番 = DeepSeek-R1-Distill-Qwen-32B
+- 生成倍率0.1 = 10%（合計4.4K問題）
+- モード1番 = 全ドメイン生成
+
+### 例2: Qwen-Math-72Bで代数100%（10K問題）を生成
+```bash
+./run_math_generation.sh 5 1.0 2 1
+```
+- モデル5番 = Qwen2.5-Math-72B-Instruct
+- 生成倍率1.0 = 100%（10K問題）
+- モード2番 = 単一ドメイン
+- ドメイン1番 = 代数
+
+### 例3: テスト用モデルで全ドメイン50%を生成
+```bash
+./run_math_generation.sh 8 0.5 1
+```
+- モデル8番 = Qwen2.5-3B-Instruct（テスト用）
+- 生成倍率0.5 = 50%（合計22K問題）
+- モード1番 = 全ドメイン生成
+
+### 例4: DeepSeek-Llama-70Bで微積分50%（5K問題）を生成
+```bash
+./run_math_generation.sh 2 0.5 2 2
+```
+- モデル2番 = DeepSeek-R1-Distill-Llama-70B
+- 生成倍率0.5 = 50%（5K問題）
+- モード2番 = 単一ドメイン
+- ドメイン2番 = 微積分
+
+### 例4: 対話モード（引数なし）
+```bash
 ./run_math_generation.sh
+```
+メニューが表示され、選択肢を対話的に選べます
 
-## Non-Interactive Mode with Arguments
+### 例5: ヘルプ表示
+```bash
+./run_math_generation.sh -h    # 日本語ヘルプ
+```
 
-### Format:
-./run_math_generation.sh <model_choice> <scale> <mode_choice> [domain_choice]
+## よくある使い方
 
-### Examples:
+### 推奨：バランス型モデルで代数を生成
+```bash
+./run_math_generation.sh 1 1 1
+```
 
-1. Generate all domains using DeepSeek-R1-Distill-Qwen-32B at 10% scale:
-   ./run_math_generation.sh 1 0.1 1
-   # Model 1 = DeepSeek-R1-Distill-Qwen-32B
-   # Scale 0.1 = 10% of default (4.4K problems total)
-   # Mode 1 = All Domains
+### 高性能：全ドメインを一括生成
+```bash
+./run_math_generation.sh 5 2
+```
 
-2. Generate algebra problems using Qwen2.5-Math-72B at full scale:
-   ./run_math_generation.sh 5 1.0 2 1
-   # Model 5 = Qwen2.5-Math-72B-Instruct
-   # Scale 1.0 = 100% (10K problems)
-   # Mode 2 = Single Domain
-   # Domain 1 = Algebra
+### カスタム：特定ドメインを指定数生成
+```bash
+./run_math_generation.sh 1 1 3 3000  # 幾何3000問題
+```
 
-3. Generate all domains using test model at 50% scale:
-   ./run_math_generation.sh 8 0.5 1
-   # Model 8 = Qwen2.5-3B-Instruct (Test model)
-   # Scale 0.5 = 50% of default (22K problems total)
-   # Mode 1 = All Domains
-
-### Model Choices:
-1 = DeepSeek-R1-Distill-Qwen-32B (Recommended - Balanced performance)
-2 = DeepSeek-R1-Distill-Llama-70B (High performance - Requires A100)
-3 = DeepSeek-R1-0528-FP4 (Memory efficient - FP4 quantized)
-4 = Gemma-3-27B-it (Google model)
-5 = Qwen2.5-Math-72B-Instruct (Math specialist)
-6 = Qwen2.5-Coder-32B-Instruct (Computational math focus)
-8 = Qwen2.5-3B-Instruct (Test model - Lightweight)
-
-### Scale Options:
-0.1 = 10% of default (Small - for testing)
-0.5 = 50% of default (Medium - for development)
-1.0 = 100% of default (Large - standard)
-2.0 = 200% of default (Extra Large - comprehensive)
-Note: Problem counts are rounded to nearest 10
-
-### Mode Choices:
-1 = All Domains - Generate complete dataset with scale applied
-2 = Single Domain - Generate problems for one specific math domain
-3 = Custom Selection - Choose multiple domains interactively (interactive mode only)
-
-### Domain Choices (for mode 2):
-1 = Algebra (10K default)
-2 = Calculus (10K default)
-3 = Geometry (6K default)
-4 = Statistics (6K default)
-5 = Number Theory (4K default)
-6 = Discrete Mathematics (8K default)
+## 注意事項
+- モデル2,5は高メモリGPU（A100 80GB）が必要
+- DeepSeekモデルはHugging Faceログインが必要
+- 生成データは data/ ディレクトリに保存されます

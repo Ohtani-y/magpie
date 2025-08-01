@@ -1,0 +1,21 @@
+{
+  "dataset_name": "Magpie-Statistics-HLE-60",
+  "model": "Qwen/Qwen2.5-3B-Instruct",
+  "domain": "statistics",
+  "problem_count": 60,
+  "description": "ADVANCED STATISTICS - Measure-theoretic probability, advanced inference, martingales",
+  "generation_date": "2025-07-31T22:47:05+09:00",
+  "parameters": {
+    "instruction_temperature": 1.1,
+    "response_temperature": 0.0,
+    "max_tokens_instruction": 1024,
+    "max_tokens_response": 4096,
+    "num_preference_responses": 7,
+    "advanced_reasoning_mode": true
+  },
+  "files": {
+    "instructions": "statistics_ins.json",
+    "sft_data": "statistics_ins_res.json",
+    "preference_data": "statistics_ins_7res_armorm.json"
+  }
+}

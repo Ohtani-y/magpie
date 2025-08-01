@@ -146,28 +146,29 @@ def main():
     except Exception as e:
         print(f"❌ 予期しないエラーが発生しました: {e}")
         sys.exit(1)
-        if args.control_tasks:
-            pre_query_template = model_config[f"pre_query_template_{args.control_tasks}"]
-            print(f"制御タスク: {args.control_tasks} (HLE数学対策特化)")
-            if args.domain:
-                print(f"ドメイン特化: {args.domain}")
-        elif args.system_prompt:
-            pre_query_template = model_config["pre_query_template_with_system_prompt"]
-            print("システムプロンプト有効。注意: システムプロンプトは性能を低下させる可能性があります。")
-        else:
-            pre_query_template = model_config["pre_query_template"]
-        stop_tokens = model_config["stop_tokens"]
-        stop_tokens_assistant = model_config["stop_tokens_assistant"]
-        stop_tokens += stop_tokens_assistant
-        stop_token_ids = model_config["stop_token_ids"]
     
-        # Process early stopping. We found that sometimes LLM will generate responses immediately after the \n token.
-        if args.early_stopping:
-            stop_tokens.append("\n")
+    if args.control_tasks:
+        pre_query_template = model_config[f"pre_query_template_{args.control_tasks}"]
+        print(f"制御タスク: {args.control_tasks} (HLE数学対策特化)")
+        if args.domain:
+            print(f"ドメイン特化: {args.domain}")
+    elif args.system_prompt:
+        pre_query_template = model_config["pre_query_template_with_system_prompt"]
+        print("システムプロンプト有効。注意: システムプロンプトは性能を低下させる可能性があります。")
+    else:
+        pre_query_template = model_config["pre_query_template"]
+    stop_tokens = model_config["stop_tokens"]
+    stop_tokens_assistant = model_config["stop_tokens_assistant"]
+    stop_tokens += stop_tokens_assistant
+    stop_token_ids = model_config["stop_token_ids"]
     
-        print(f"事前クエリテンプレート: {pre_query_template}")
-        print(f"停止トークン: {stop_tokens}")
-        print(f"停止トークンID: {stop_token_ids}")
+    # Process early stopping. We found that sometimes LLM will generate responses immediately after the \n token.
+    if args.early_stopping:
+        stop_tokens.append("\n")
+    
+    print(f"事前クエリテンプレート: {pre_query_template}")
+    print(f"停止トークン: {stop_tokens}")
+    print(f"停止トークンID: {stop_token_ids}")
     
     # Apply logits processors
     if args.logits_processor and args.flaming_tokens:
@@ -181,7 +182,13 @@ def main():
         print(f"Logits processor applied: {logits_processor}")
     else:
         logits_processor = None
+    
+    # Initialize stop tokens if not defined
+    if 'stop_tokens' not in locals():
+        stop_tokens = []
+        stop_token_ids = []
         
+    
     # Define sampling parameters
     sampling_params = SamplingParams(
         n=args.n,
